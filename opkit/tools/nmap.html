@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nmap Cheatsheet — Commands, Flags & NSE Scripts | OPKIT</title>
+  <meta name="description" content="Complete Nmap reference: scan types, target scope control, host discovery, firewall evasion, service detection, OS fingerprinting, NSE scripts, output formats, and timing templates. One-click copy for all commands.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #5a8ae8; }</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────── -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links" role="list">
+      <a href="../index.html" class="nav__link" role="listitem">Tools</a>
+    </div>
+    <div class="nav__search">
+      <div class="nav__search-wrap" style="position:relative">
+        <svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands">
+        <div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div>
+      </div>
+    </div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" aria-expanded="false" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── TOOL PAGE ────────────────────────────────────────── -->
+<div class="tool-page">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+
+  <!-- Sidebar -->
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Nmap navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        All tools
+      </a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/nmap/images/nmap-logo.svg" alt="Nmap" onerror="this.onerror=null;this.src='../images/tools/nmap.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Nmap</div>
+          <div class="tool-sidebar__version">v7.95 · Network mapper</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15" x2="12" y2="15"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="target-scope">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+          Target Scope
+        </div>
+        <div class="sidebar-nav-item" data-section="discovery">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Host Discovery
+        </div>
+        <div class="sidebar-nav-item" data-section="scan-types">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Scan Types
+        </div>
+        <div class="sidebar-nav-item" data-section="ports">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          Port Specification
+        </div>
+        <div class="sidebar-nav-item" data-section="service-os">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Service & OS
+        </div>
+        <div class="sidebar-nav-item" data-section="timing">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Timing
+        </div>
+        <div class="sidebar-nav-item" data-section="nse">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          NSE Scripts
+        </div>
+        <div class="sidebar-nav-item" data-section="evasion">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Firewall Evasion
+        </div>
+        <div class="sidebar-nav-item" data-section="output">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Output
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="tool-content" id="main-content">
+
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>
+        Network Mapper · Recon
+      </div>
+      <h1 class="tool-hero__title">Nmap</h1>
+      <p class="tool-hero__desc">The industry-standard network exploration tool and security scanner. Used for host discovery, port scanning, service version detection, OS fingerprinting, and running NSE automation scripts.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Port Scanning</span>
+        <span class="tool-hero__tag">Target Scope</span>
+        <span class="tool-hero__tag">Host Discovery</span>
+        <span class="tool-hero__tag">Service Detection</span>
+        <span class="tool-hero__tag">OS Fingerprinting</span>
+        <span class="tool-hero__tag">NSE Scripting</span>
+        <span class="tool-hero__tag">Firewall Evasion</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-8); border-color: rgba(90, 138, 232, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(90, 138, 232, 0.08); border-bottom-color: rgba(90, 138, 232, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Standard field triage progression — start here before deep or targeted scanning</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sV</span> <span class="tok-flag">-sC</span> <span class="tok-flag">-T4</span> <span class="tok-arg">&lt;target&gt;</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">quick triage</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p-</span> <span class="tok-flag">-sV</span> <span class="tok-flag">--min-rate</span> <span class="tok-val">2000</span> <span class="tok-flag">-T4</span> <span class="tok-arg">&lt;target&gt;</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">full port with rate control</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-Pn</span> <span class="tok-flag">-sV</span> <span class="tok-arg">&lt;target&gt;</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">skip ICMP when host seems down</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target Scope Control -->
+    <section class="content-section" id="target-scope" aria-labelledby="target-scope-title">
+      <h2 class="content-section__title" id="target-scope-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+        Target Scope Control
+      </h2>
+
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <div class="callout__title">Scope Discipline &amp; Engagement Boundaries</div>
+          In real security engagements, staying inside authorized scope is the single most important discipline. Striking an out-of-scope gateway, production database, or third-party appliance is a critical ROE breach. Always sanity-check parsed ranges with <code>-sL</code> before transmitting active probes.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Dry-run / list only (scope sanity check)</div>
+              <div class="cmd-block__desc">Prints target list without sending a single packet; verifies scope and DNS resolution before firing</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sL</span> <span class="tok-arg">10.10.10.0/24</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Exclude specific hosts from CIDR sweep</div>
+              <div class="cmd-block__desc">Omit gateways, printers, domain controllers, or out-of-scope production machines</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-arg">10.10.10.0/24</span> <span class="tok-flag">--exclude</span> <span class="tok-val">10.10.10.1,10.10.10.254</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Exclude targets from file (blocklist)</div>
+              <div class="cmd-block__desc">Load forbidden CIDRs or out-of-scope IP ranges from engagement ROE files</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-arg">10.10.10.0/24</span> <span class="tok-flag">--excludefile</span> <span class="tok-val">scope_blocklist.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Read targets from input list</div>
+              <div class="cmd-block__desc">Batch scan approved IP lists, CIDRs, or hostnames with full output logging</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-iL</span> <span class="tok-val">targets.txt</span> <span class="tok-flag">-sV</span> <span class="tok-flag">-oA</span> <span class="tok-val">from_file_scan</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Host Discovery -->
+    <section class="content-section" id="discovery" aria-labelledby="discovery-title">
+      <h2 class="content-section__title" id="discovery-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Host Discovery
+      </h2>
+
+      <div class="cmd-list" role="list">
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Ping sweep (no port scan)</div>
+              <div class="cmd-block__desc">Discover live hosts without scanning ports</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sn</span> <span class="tok-arg">192.168.1.0/24</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sn</span> <span class="tok-arg">192.168.1.1-254</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">ARP ping (local network)</div>
+              <div class="cmd-block__desc">Fast discovery on same subnet; bypasses firewall rules</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-PR</span> <span class="tok-flag">-sn</span> <span class="tok-arg">192.168.1.0/24</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Disable all host discovery (treat all as up)</div>
+              <div class="cmd-block__desc">Useful when ICMP is blocked</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-Pn</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Scan Types -->
+    <section class="content-section" id="scan-types" aria-labelledby="scan-types-title">
+      <h2 class="content-section__title" id="scan-types-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Scan Types
+      </h2>
+
+      <div class="cmd-list" role="list">
+
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">SYN scan — fast / half-open</div>
+              <div class="cmd-block__desc">Default when run as root; fast TCP scan that sends SYN and tears down with RST. Note: "Stealth" is a legacy myth — modern IDS/IPS and EDR flag incomplete handshakes immediately.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sS</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">TCP connect scan</div>
+              <div class="cmd-block__desc">Full 3-way connection; works without root privileges; highly visible in application logs</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sT</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">UDP scan (rate-limited timeout alert)</div>
+              <div class="cmd-block__desc">A full 65,535-port UDP scan can take 36+ hours because Nmap waits for timeouts on unresponsive ports. Always start with -sU --top-ports 100 or a targeted list (53, 161, 123, 500).</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sU</span> <span class="tok-flag">--top-ports</span> <span class="tok-val">100</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sU</span> <span class="tok-flag">-p</span> <span class="tok-val">53,67,68,123,161,500</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sU</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">ACK scan — firewall ruleset mapping</div>
+              <div class="cmd-block__desc">Doesn't tell you open/closed; it maps stateful vs stateless firewall filters (RST response = unfiltered, drop/ICMP unreachable = filtered)</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sA</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Window scan — TCP window size port detection</div>
+              <div class="cmd-block__desc">ACK variant; observes the TCP window size in returning RST packets to leak open vs closed on certain OS stacks</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sW</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Maimon scan (FIN/ACK combo)</div>
+              <div class="cmd-block__desc">Sends FIN/ACK probes named after Uriel Maimon; effective against BSD-derived stacks that drop the probe on open ports</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sM</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">NULL, FIN &amp; Xmas scans — stateless filter bypass</div>
+              <div class="cmd-block__desc">Bypasses stateless filters that only watch SYN. RFC 793 standard behavior: closed ports return RST; open ports drop packet silently.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="callout callout--warn" style="margin: var(--sp-3) var(--sp-4); padding: var(--sp-2) var(--sp-3);" role="note">
+              <svg class="callout__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="callout__body" style="font-size:var(--t-xs);">
+                <strong>Windows Incompatibility Warning:</strong> NULL (<code>-sN</code>), FIN (<code>-sF</code>), and Xmas (<code>-sX</code>) scans are unreliable against Windows hosts and Cisco devices. The Windows TCP/IP stack responds with RST to all non-SYN probes regardless of port state, making every port appear closed.
+              </div>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sN</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sF</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sX</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Aggressive scan (all at once)</div>
+              <div class="cmd-block__desc">Enables OS detection, version detection, script scanning, and traceroute</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-A</span> <span class="tok-flag">-T4</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Full port scan + service version + default scripts</div>
+              <div class="cmd-block__desc">Most thorough single-command recon sweep</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sV</span> <span class="tok-flag">-sC</span> <span class="tok-flag">-p-</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Port Specification -->
+    <section class="content-section" id="ports" aria-labelledby="ports-title">
+      <h2 class="content-section__title" id="ports-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Port Specification
+      </h2>
+      <table class="flags-table" role="table">
+        <thead>
+          <tr><th scope="col">Flag</th><th scope="col">Description</th><th scope="col">Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="flag-code">-p 80</code></td><td class="flag-desc">Single port</td><td class="flag-default font-mono">nmap -p 80 host</td></tr>
+          <tr><td><code class="flag-code">-p 80,443,8080</code></td><td class="flag-desc">Multiple ports</td><td class="flag-default">-p 22,80,443</td></tr>
+          <tr><td><code class="flag-code">-p 1-1024</code></td><td class="flag-desc">Port range</td><td class="flag-default">-p 1-65535</td></tr>
+          <tr><td><code class="flag-code">-p-</code></td><td class="flag-desc">All 65535 ports</td><td class="flag-default">nmap -p- host</td></tr>
+          <tr><td><code class="flag-code">-F</code></td><td class="flag-desc">Fast scan (top 100 ports)</td><td class="flag-default">nmap -F host</td></tr>
+          <tr><td><code class="flag-code">--top-ports N</code></td><td class="flag-desc">Scan top N most common ports</td><td class="flag-default">--top-ports 1000</td></tr>
+          <tr><td><code class="flag-code">-r</code></td><td class="flag-desc">Scan ports consecutively</td><td class="flag-default">nmap -r host</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Service & OS Detection -->
+    <section class="content-section" id="service-os" aria-labelledby="service-os-title">
+      <h2 class="content-section__title" id="service-os-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Service &amp; OS Detection
+      </h2>
+      <div class="cmd-list" role="list">
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Service version detection</div>
+              <div class="cmd-block__desc">Probe open ports to determine service and version</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sV</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sV</span> <span class="tok-flag">--version-intensity</span> <span class="tok-val">9</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">OS fingerprinting</div>
+              <div class="cmd-block__desc">Requires at least one open and one closed port</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-O</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-O</span> <span class="tok-flag">--osscan-guess</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timing -->
+    <section class="content-section" id="timing" aria-labelledby="timing-title">
+      <h2 class="content-section__title" id="timing-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Timing Templates
+      </h2>
+      <table class="flags-table" role="table">
+        <thead><tr><th scope="col">Flag</th><th scope="col">Name</th><th scope="col">Use when</th></tr></thead>
+        <tbody>
+          <tr><td><code class="flag-code">-T0</code></td><td class="flag-desc">Paranoid</td><td class="flag-default">IDS evasion (5 min/probe)</td></tr>
+          <tr><td><code class="flag-code">-T1</code></td><td class="flag-desc">Sneaky</td><td class="flag-default">Slow IDS evasion</td></tr>
+          <tr><td><code class="flag-code">-T2</code></td><td class="flag-desc">Polite</td><td class="flag-default">Low bandwidth impact</td></tr>
+          <tr><td><code class="flag-code">-T3</code></td><td class="flag-desc">Normal</td><td class="flag-default">Default</td></tr>
+          <tr><td><code class="flag-code">-T4</code></td><td class="flag-desc">Aggressive</td><td class="flag-default">Fast, reliable network ✓ recommended</td></tr>
+          <tr><td><code class="flag-code">-T5</code></td><td class="flag-desc">Insane</td><td class="flag-default">May sacrifice accuracy</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Low-level performance tuning sub-table -->
+      <div style="margin-top: var(--sp-6);">
+        <h3 style="font-size: var(--t-md); font-weight: 700; margin-bottom: var(--sp-2); color: var(--c-text); display:flex; align-items:center; gap:var(--sp-2);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Low-Level Performance Tuning
+        </h3>
+        <p style="font-size: var(--t-sm); color: var(--c-text-muted); margin-bottom: var(--sp-4); line-height: var(--lh-relaxed);">
+          <code>-T4</code> is merely an aggregate template. Production-grade full-port scans and internal sweeps require explicit flag overrides to prevent scans from stalling across high-latency hops or rate-limited hosts.
+        </p>
+        <div class="flags-table-wrap">
+          <table class="flags-table" role="table">
+            <thead>
+              <tr><th scope="col">Flag Override</th><th scope="col">Purpose &amp; Mechanics</th><th scope="col">Syntax Example</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code class="flag-code">--min-rate 1000</code></td>
+                <td class="flag-desc">Guarantees packets are sent at least at this rate; ensures full 65,535-port scans finish in minutes rather than hours</td>
+                <td class="flag-default font-mono">--min-rate 1000</td>
+              </tr>
+              <tr>
+                <td><code class="flag-code">--max-retries 2</code></td>
+                <td class="flag-desc">Reduces probe retransmissions when packet loss is low; drastically speeds up scans by cutting wait cycles</td>
+                <td class="flag-default font-mono">--max-retries 2</td>
+              </tr>
+              <tr>
+                <td><code class="flag-code">--host-timeout 5m</code></td>
+                <td class="flag-desc">Prevents Nmap from hanging indefinitely on one unresponsive or tarpitted target</td>
+                <td class="flag-default font-mono">--host-timeout 5m</td>
+              </tr>
+              <tr>
+                <td><code class="flag-code">--min-hostgroup 64</code></td>
+                <td class="flag-desc">Processes more hosts in parallel on CIDR sweeps instead of small default batches</td>
+                <td class="flag-default font-mono">--min-hostgroup 64</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cmd-block" style="margin-top: var(--sp-4);" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Full port scan with rate, retry &amp; timeout overrides</div>
+              <div class="cmd-block__desc">The gold-standard high-throughput scanning recipe for internal engagements</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p-</span> <span class="tok-flag">-sV</span> <span class="tok-flag">--min-rate</span> <span class="tok-val">2000</span> <span class="tok-flag">--max-retries</span> <span class="tok-val">2</span> <span class="tok-flag">--host-timeout</span> <span class="tok-val">5m</span> <span class="tok-flag">-T4</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NSE -->
+    <section class="content-section" id="nse" aria-labelledby="nse-title">
+      <h2 class="content-section__title" id="nse-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        NSE Scripts
+      </h2>
+
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">Scripts live in <code>/usr/share/nmap/scripts/</code>. Browse categories with <code>ls /usr/share/nmap/scripts/ | grep &lt;keyword&gt;</code>.</div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">Default safe scripts</div><div class="cmd-block__desc">Run safe, non-intrusive discovery and banner enumeration scripts</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sC</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">Vulnerability scan (--script vuln)</div><div class="cmd-block__desc">Run all vuln-category scripts against target</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="callout callout--warn" style="margin: var(--sp-3) var(--sp-4); padding: var(--sp-2) var(--sp-3);" role="alert">
+              <svg class="callout__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="callout__body" style="font-size:var(--t-xs);">
+                <strong>Critical Production Risk Warning:</strong> The <code>vuln</code> category includes scripts that actually trigger known software vulnerabilities, while the <code>dos</code> and <code>exploit</code> categories can crash unpatched targets or crash services. Nmap's documentation warns against running these against unverified production systems without formal risk assessment and ROE authorization.
+              </div>
+            </div>
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">#</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--script</span> <span class="tok-val">vuln</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">Precise SMB vulnerability check (EternalBlue)</div><div class="cmd-block__desc">Much faster and quieter than running all wildcard smb-vuln-* scripts</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">#</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p</span> <span class="tok-val">445</span> <span class="tok-flag">--script</span> <span class="tok-val">smb-vuln-ms17-010</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">SMB message signing status (relay attack check)</div><div class="cmd-block__desc">Tells you if SMB signing is disabled or not required — determining if NTLM relay attacks are viable</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">#</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p</span> <span class="tok-val">445</span> <span class="tok-flag">--script</span> <span class="tok-val">smb-security-mode,smb2-security-mode</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">FTP anonymous login + vsftpd backdoor check</div><div class="cmd-block__desc">Tests the two most prevalent FTP security flaws in a single shot</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p</span> <span class="tok-val">21</span> <span class="tok-flag">--script</span> <span class="tok-val">ftp-anon,ftp-vsftpd-backdoor</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">DNS zone transfer attempt (AXFR)</div><div class="cmd-block__desc">Single command attempt to dump the entire authoritative DNS zone table from target name server</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p</span> <span class="tok-val">53</span> <span class="tok-flag">--script</span> <span class="tok-val">dns-zone-transfer</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">SSH authentication methods enumeration</div><div class="cmd-block__desc">Inspect accepted auth methods (password vs publickey) prior to launching brute-force attacks</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-p</span> <span class="tok-val">22</span> <span class="tok-flag">--script</span> <span class="tok-val">ssh-auth-methods</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">Wildcard script category execution</div><div class="cmd-block__desc">Run all scripts matching a wildcard pattern against specific open ports</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--script</span> <span class="tok-val">"http-*"</span> <span class="tok-flag">-p</span> <span class="tok-val">80,443</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">#</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--script</span> <span class="tok-val">"smb-vuln-*"</span> <span class="tok-flag">-p</span> <span class="tok-val">445</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">SMB enumeration</div><div class="cmd-block__desc">Enumerate shares, users, OS via SMB</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">#</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--script</span> <span class="tok-val">smb-enum-shares,smb-enum-users</span> <span class="tok-flag">-p</span> <span class="tok-val">445</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div><div class="cmd-block__label">HTTP enumeration</div><div class="cmd-block__desc">Headers, methods, title, robots.txt</div></div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line"><span class="code-line__prompt" aria-hidden="true">$</span><code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--script</span> <span class="tok-val">http-enum,http-headers,http-methods</span> <span class="tok-flag">-p</span> <span class="tok-val">80,443</span> <span class="tok-arg">10.10.10.1</span></code><button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Firewall / IDS Evasion -->
+    <section class="content-section" id="evasion" aria-labelledby="evasion-title">
+      <h2 class="content-section__title" id="evasion-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Firewall / IDS Evasion
+      </h2>
+
+      <div class="callout callout--warn" role="alert">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <div class="callout__title">Authorized Evasion Testing Only</div>
+          Decoys, fragmentation, and source-port spoofing send packets with forged or manipulated source addresses to third parties and network devices. Only use when Rules of Engagement explicitly permit evasion testing. Never run <code>-D RND</code> against third-party infrastructure without prior written authorization.
+        </div>
+      </div>
+
+      <div class="flags-table-wrap" style="margin-bottom: var(--sp-6);">
+        <table class="flags-table" role="table">
+          <thead>
+            <tr><th scope="col">Technique</th><th scope="col">Command</th><th scope="col">Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Fragmentation</strong></td>
+              <td><code class="flag-code">nmap -f &lt;target&gt;</code></td>
+              <td class="flag-desc">Splits TCP header across packets; bypasses stateless filters that only inspect the first packet</td>
+            </tr>
+            <tr>
+              <td><strong>Decoys</strong></td>
+              <td><code class="flag-code">nmap -D RND:10 &lt;target&gt;</code></td>
+              <td class="flag-desc">Mixes traffic from 10 random decoy IPs to conceal the real scanner address</td>
+            </tr>
+            <tr>
+              <td><strong>Decoys + real IP marker</strong></td>
+              <td><code class="flag-code">nmap -sS -D 10.0.0.1,10.0.0.2,ME &lt;target&gt;</code></td>
+              <td class="flag-desc">Controls where the real IP (<code>ME</code>) appears in the decoy sequence</td>
+            </tr>
+            <tr>
+              <td><strong>Source port spoofing</strong></td>
+              <td><code class="flag-code">nmap --source-port 53 &lt;target&gt;</code></td>
+              <td class="flag-desc">Uses a port firewalls usually allow (DNS); bypasses poorly configured ACLs</td>
+            </tr>
+            <tr>
+              <td><strong>Packet padding</strong></td>
+              <td><code class="flag-code">nmap --data-length 24 &lt;target&gt;</code></td>
+              <td class="flag-desc">Defeats size-based fingerprinting and signature detection</td>
+            </tr>
+            <tr>
+              <td><strong>Slow evasion</strong></td>
+              <td><code class="flag-code">nmap -T1 --scan-delay 1s &lt;target&gt;</code></td>
+              <td class="flag-desc">Stretches probe intervals to stay under rate thresholds and IDS alert ceilings</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">IP fragmentation (8-byte MTU split)</div>
+              <div class="cmd-block__desc">Splits TCP header across multiple packets to bypass legacy inspection engines</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-f</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--mtu</span> <span class="tok-val">16</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Decoy scanning (traffic mixing)</div>
+              <div class="cmd-block__desc">Send probes with random decoy addresses so target logs show scans from multiple IPs</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-D</span> <span class="tok-val">RND:10</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-sS</span> <span class="tok-flag">-D</span> <span class="tok-val">10.0.0.1,10.0.0.2,ME</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Source port spoofing &amp; payload padding</div>
+              <div class="cmd-block__desc">Originates probes from trusted ports (53 DNS, 88 Kerberos) and appends random bytes</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--source-port</span> <span class="tok-val">53</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">--data-length</span> <span class="tok-val">24</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">#</span>
+              <code class="code-line__code"><span class="tok-cmd">nmap</span> <span class="tok-flag">-T1</span> <span class="tok-flag">--scan-delay</span> <span class="tok-val">1s</span> <span class="tok-arg">10.10.10.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Output -->
+    <section class="content-section" id="output" aria-labelledby="output-title">
+      <h2 class="content-section__title" id="output-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Output Formats
+      </h2>
+      <table class="flags-table" role="table">
+        <thead><tr><th scope="col">Flag</th><th scope="col">Format</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code class="flag-code">-oN file.txt</code></td><td class="flag-desc">Normal (human-readable)</td><td class="flag-default">Best for reading</td></tr>
+          <tr><td><code class="flag-code">-oX file.xml</code></td><td class="flag-desc">XML</td><td class="flag-default">For tools like Metasploit</td></tr>
+          <tr><td><code class="flag-code">-oG file.gnmap</code></td><td class="flag-desc">Grepable</td><td class="flag-default">For grep/awk pipelines</td></tr>
+          <tr><td><code class="flag-code">-oA basename</code></td><td class="flag-desc">All three formats</td><td class="flag-default">Recommended for CTFs</td></tr>
+          <tr><td><code class="flag-code">-v / -vv</code></td><td class="flag-desc">Verbose output</td><td class="flag-default">See results as found</td></tr>
+          <tr><td><code class="flag-code">--reason</code></td><td class="flag-desc">Show port state reason</td><td class="flag-default">Useful for debugging</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Quick initial scan</div><div class="cheat-cell__code">nmap -sV -sC -T4 &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">All ports + scripts</div><div class="cheat-cell__code">nmap -sV -sC -p- -T4 &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Rate-controlled full port</div><div class="cheat-cell__code">nmap -p- -sV --min-rate 2000 -T4 &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Subnet discovery</div><div class="cheat-cell__code">nmap -sn 192.168.1.0/24</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">UDP top 100 ports</div><div class="cheat-cell__code">nmap -sU --top-ports 100 &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Vuln check (assessed)</div><div class="cheat-cell__code">nmap --script vuln &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Save all formats</div><div class="cheat-cell__code">nmap -oA scan &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Treat all as up</div><div class="cheat-cell__code">nmap -Pn &lt;target&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Aggressive + T4</div><div class="cheat-cell__code">nmap -A -T4 &lt;target&gt;</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Pipeline → Searchsploit</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">nmap -sV -oX scan.xml &amp;&amp; searchsploit --nmap scan.xml</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Pipeline → Metasploit</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">db_import scan.xml</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Pipeline → Hydra (SSH 22)</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">hydra -L users.txt -P rockyou.txt ssh://&lt;target&gt;</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- /tool-page -->
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'Nmap', cmd:'nmap -sV -sC -p- 10.10.10.1', desc:'Full port scan with version and scripts', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -p- --min-rate 2000 -sV -T4 10.10.10.1', desc:'Fast full-port scan with rate control', url:'nmap.html#timing', target:'nmap.html#timing' },
+  { tool:'Nmap', cmd:'nmap 10.10.10.0/24 --exclude 10.10.10.1', desc:'Exclude out-of-scope hosts', url:'nmap.html#target-scope', target:'nmap.html#target-scope' },
+  { tool:'Nmap', cmd:'nmap 10.10.10.0/24 --excludefile scope_blocklist.txt', desc:'Exclude targets from blocklist file', url:'nmap.html#target-scope', target:'nmap.html#target-scope' },
+  { tool:'Nmap', cmd:'nmap -sL 10.10.10.0/24', desc:'Dry-run target list verification without packet transmission', url:'nmap.html#target-scope', target:'nmap.html#target-scope' },
+  { tool:'Nmap', cmd:'nmap -sA 10.10.10.1', desc:'Map firewall rules (ACK scan)', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -sW 10.10.10.1', desc:'Window scan to detect open ports via TCP window field', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -sM 10.10.10.1', desc:'Maimon FIN/ACK scan for BSD stacks', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -sN 10.10.10.1', desc:'NULL scan to bypass stateless SYN filters', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -D RND:10 10.10.10.1', desc:'Decoy scanning for evasion', url:'nmap.html#evasion', target:'nmap.html#evasion' },
+  { tool:'Nmap', cmd:'nmap -sS -D 10.0.0.1,10.0.0.2,ME 10.10.10.1', desc:'Decoy scan with explicit real IP marker (ME)', url:'nmap.html#evasion', target:'nmap.html#evasion' },
+  { tool:'Nmap', cmd:'nmap -f 10.10.10.1', desc:'Packet fragmentation evasion', url:'nmap.html#evasion', target:'nmap.html#evasion' },
+  { tool:'Nmap', cmd:'nmap --source-port 53 10.10.10.1', desc:'Source port spoofing (DNS 53) evasion', url:'nmap.html#evasion', target:'nmap.html#evasion' },
+  { tool:'Nmap', cmd:'nmap -p445 --script smb-vuln-ms17-010 10.10.10.1', desc:'Check EternalBlue', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -p445 --script smb-security-mode,smb2-security-mode 10.10.10.1', desc:'Check SMB signing status for relay viability', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -p21 --script ftp-anon,ftp-vsftpd-backdoor 10.10.10.1', desc:'FTP anonymous login and backdoor check', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -p53 --script dns-zone-transfer 10.10.10.1', desc:'DNS zone transfer (AXFR)', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -p22 --script ssh-auth-methods 10.10.10.1', desc:'SSH authentication methods enumeration', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -sn 192.168.1.0/24', desc:'Host discovery ping sweep', url:'nmap.html#discovery', target:'nmap.html#discovery' },
+  { tool:'Nmap', cmd:'nmap -A -T4 10.10.10.1', desc:'Aggressive scan', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap --script vuln 10.10.10.1', desc:'Vulnerability scripts', url:'nmap.html#nse', target:'nmap.html#nse' },
+  { tool:'Nmap', cmd:'nmap -sU --top-ports 100 10.10.10.1', desc:'UDP top 100 ports scan', url:'nmap.html#scan-types', target:'nmap.html#scan-types' },
+  { tool:'Nmap', cmd:'nmap -Pn 10.10.10.1', desc:'Skip host discovery', url:'nmap.html#discovery', target:'nmap.html#discovery' },
+  { tool:'Nmap', cmd:'nmap -oA scan 10.10.10.1', desc:'Save all output formats', url:'nmap.html#output', target:'nmap.html#output' },
+  { tool:'Nmap', cmd:'nmap -O 10.10.10.1', desc:'OS fingerprinting', url:'nmap.html#service-os', target:'nmap.html#service-os' }
+]);
+</script>
+</body>
+</html>

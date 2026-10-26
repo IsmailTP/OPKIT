@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ffuf Cheatsheet — Web Fuzzer Commands &amp; Flags | OPKIT</title>
+  <meta name="description" content="Complete ffuf reference: directory fuzzing, parameter fuzzing, virtual host scanning, response filtering, wordlists, and one-click copy commands.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #00c8a8; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="ffuf navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/ffuf/images/ffuf-logo.svg" alt="ffuf" onerror="this.onerror=null;this.src='../images/tools/ffuf.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">ffuf</div>
+          <div class="tool-sidebar__version">v2.x · Web fuzzer</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="flags">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+          Core Flags
+        </div>
+        <div class="sidebar-nav-item" data-section="directory">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Directory Fuzzing
+        </div>
+        <div class="sidebar-nav-item" data-section="fuzzing">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Parameter Fuzzing
+        </div>
+        <div class="sidebar-nav-item" data-section="vhosts">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          VHost Scanning
+        </div>
+        <div class="sidebar-nav-item" data-section="filtering">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtering
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Web Fuzzer · Go</div>
+      <h1 class="tool-hero__title">ffuf</h1>
+      <p class="tool-hero__desc">Fuzz Faster U Fool &mdash; a blazing-fast web fuzzer written in Go. Designed for directory discovery, parameter fuzzing, virtual host enumeration, and any HTTP-based wordlist attack. Supports multiple keywords (FUZZ, W1, W2…) simultaneously.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Directory Brute-Force</span>
+        <span class="tool-hero__tag">Parameter Fuzzing</span>
+        <span class="tool-hero__tag">VHost Enumeration</span>
+        <span class="tool-hero__tag">Filter by Status</span>
+        <span class="tool-hero__tag">Multi-keyword</span>
+        <span class="tool-hero__tag">Auto-Calibration</span>
+        <span class="tool-hero__tag">Burp Integration</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(0, 200, 168, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(0, 200, 168, 0.08); border-bottom-color: rgba(0, 200, 168, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Three commands cover 80% of ffuf usage.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/FUZZ</span> <span class="tok-flag">-ac</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">calibrated directory scan</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/FUZZ</span> <span class="tok-flag">-ac</span> <span class="tok-flag">-e</span> <span class="tok-val">.php,.bak,.zip</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">with extensions + backups</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-H</span> <span class="tok-val">"Host: FUZZ.target"</span> <span class="tok-flag">-ac</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">vhost discovery</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning Box — The Filter Traps -->
+    <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-6);">
+      <svg class="callout__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div class="callout__body">
+        <div class="callout__title" style="color:var(--c-warn); font-size:var(--t-base);">Why am I seeing 400 results? — The filter traps.</div>
+        <ul style="margin:0; padding-left:var(--sp-5); line-height:var(--lh-relaxed);">
+          <li style="margin-bottom:var(--sp-2);"><strong><code>-mc all</code> is a trap:</strong> It disables filtering entirely. On any modern app (WordPress, Django, Express) you'll drown in 404s and 3xx redirects that all lead to the same catch-all page.</li>
+          <li style="margin-bottom:var(--sp-2);"><strong><code>-fs</code> is a guess, not a rule:</strong> If your guessed byte length is off by one, you either filter all real findings or filter nothing. Use <code>-ac</code> when you don't know the baseline.</li>
+          <li style="margin-bottom:var(--sp-2);"><strong><code>-t 40</code> is aggressive:</strong> Default threads overwhelm small apps, trigger WAFs, and can lock accounts on login endpoints. Drop to <code>-t 10</code> on unknown targets, or use <code>-rate 20</code> to cap requests per second.</li>
+          <li style="margin:0;"><strong>Cluster bomb explodes:</strong> <code>-mode clusterbomb</code> (the default for multiple <code>-w</code>) multiplies list lengths. Two lists of 100 = 10,000 requests; three lists of 100 = 1,000,000. Always estimate <code>len(A) &times; len(B) &times; …</code> before launching against live targets.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Info Callout — Wordlist Reality -->
+    <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-8);">
+      <svg class="callout__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="callout__body">
+        <div class="callout__title" style="color:var(--c-info); font-size:var(--t-base);">Wordlist choice matters more than flags.</div>
+        <p style="margin-bottom:var(--sp-2);"><code>dirb/common.txt</code> is a 2003 relic with ~4,600 entries. SecLists <code>raft-medium-directories.txt</code> has ~30,000 entries and finds 3–5&times; more paths on modern apps.</p>
+        <p style="margin-bottom:var(--sp-2); font-weight:600;">Recommended wordlist paths to reference in examples:</p>
+        <ul style="margin:0; padding-left:var(--sp-5); font-family:var(--f-mono); font-size:var(--t-xs); line-height:var(--lh-relaxed);">
+          <li style="margin-bottom:var(--sp-1);"><strong style="font-family:var(--f-sans); font-size:var(--t-sm);">Directories:</strong> /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</li>
+          <li style="margin-bottom:var(--sp-1);"><strong style="font-family:var(--f-sans); font-size:var(--t-sm);">Files:</strong> /usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt</li>
+          <li style="margin-bottom:var(--sp-1);"><strong style="font-family:var(--f-sans); font-size:var(--t-sm);">Vhosts:</strong> /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</li>
+          <li style="margin:0;"><strong style="font-family:var(--f-sans); font-size:var(--t-sm);">Parameters:</strong> /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Core Flags -->
+    <section class="content-section" id="flags" aria-labelledby="flags-title">
+      <h2 class="content-section__title" id="flags-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>Core Flags</h2>
+      
+      <!-- Auto-calibration note -->
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          <strong>-ac is your default:</strong> Unless you already know the exact baseline response size and want to filter by hand, always add <code>-ac</code>. It sends one baseline request, measures the response, and hides anything matching that shape. This is the difference between 3 useful results and 400 garbage hits.
+        </div>
+      </div>
+
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Flag</th><th scope="col">Description</th><th scope="col">Default</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">-w wordlist</code></td><td class="flag-desc">Wordlist path (use :KEYWORD for multiple)</td><td class="flag-default">required</td></tr>
+            <tr><td><code class="flag-code">-u URL</code></td><td class="flag-desc">Target URL with FUZZ keyword</td><td class="flag-default">required</td></tr>
+            <tr><td><code class="flag-code">-ac</code></td><td class="flag-desc">Auto-calibrate the baseline response and filter it out</td><td class="flag-default">off</td></tr>
+            <tr><td><code class="flag-code">-H "Header: val"</code></td><td class="flag-desc">Custom HTTP header</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-X METHOD</code></td><td class="flag-desc">HTTP method (GET, POST, PUT, etc.)</td><td class="flag-default">GET</td></tr>
+            <tr><td><code class="flag-code">-d data</code></td><td class="flag-desc">POST data body</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-rate N</code></td><td class="flag-desc">Max requests per second (cleaner than -t + -p)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-x URL</code></td><td class="flag-desc">HTTP/SOCKS5 proxy (e.g. route through Burp at http://127.0.0.1:8080)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-request file</code></td><td class="flag-desc">Read raw HTTP request from file (Burp export)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-mode mode</code></td><td class="flag-desc">Multi-wordlist iteration mode (clusterbomb or pitchfork)</td><td class="flag-default">clusterbomb</td></tr>
+            <tr><td><code class="flag-code">-ignore-body</code></td><td class="flag-desc">Skip downloading response bodies (speeds up scans dramatically when only checking status codes; combines with -mc)</td><td class="flag-default">false</td></tr>
+            <tr><td><code class="flag-code">-c</code></td><td class="flag-desc">Colorize terminal output</td><td class="flag-default">off</td></tr>
+            <tr><td><code class="flag-code">-t N</code></td><td class="flag-desc">Threads (concurrent requests)</td><td class="flag-default">40</td></tr>
+            <tr><td><code class="flag-code">-p delay</code></td><td class="flag-desc">Delay between requests in seconds (e.g. 0.1)</td><td class="flag-default">0</td></tr>
+            <tr><td><code class="flag-code">-timeout N</code></td><td class="flag-desc">Request timeout (seconds)</td><td class="flag-default">10</td></tr>
+            <tr><td><code class="flag-code">-o file</code></td><td class="flag-desc">Output file</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-of format</code></td><td class="flag-desc">Output format (json, csv, md, html)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-recursion</code></td><td class="flag-desc">Enable recursive fuzzing</td><td class="flag-default">off</td></tr>
+            <tr><td><code class="flag-code">-e .php,.html</code></td><td class="flag-desc">File extension list to append</td><td class="flag-default">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Directory Fuzzing -->
+    <section class="content-section" id="directory" aria-labelledby="directory-title">
+      <h2 class="content-section__title" id="directory-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Directory Fuzzing</h2>
+      <div class="cmd-list" role="list">
+        
+        <!-- Block 1: Calibrated directory scan -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Calibrated directory scan (recommended default)</div>
+              <div class="cmd-block__desc"><code>-ac</code> sends a baseline request, learns the default response size, and hides anything matching it. Right answer for 90% of targets.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/FUZZ</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Directory scan with extensions and backup files -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Directory scan with extensions and backup files</div>
+              <div class="cmd-block__desc">The <code>-e</code> extensions hunt for developer leftovers &mdash; .bak, .old, .swp (vim), archive, and database dump files. <code>-mc 200</code> restricts output to successful hits only. This single pattern finds source code, config files, and DB exports more often than any other ffuf technique.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/FUZZ</span> <span class="tok-flag">-ac</span> <span class="tok-flag">-e</span> <span class="tok-val">.php,.bak,.old,.backup,.swp,.zip,.tar.gz,.sql</span> <span class="tok-flag">-mc</span> <span class="tok-val">200</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Recursive directory scan -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Recursive directory scan</div>
+              <div class="cmd-block__desc">Automatically go deeper into discovered directories up to the specified depth.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/FUZZ</span> <span class="tok-flag">-recursion</span> <span class="tok-flag">-recursion-depth</span> <span class="tok-val">3</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Parameter Fuzzing -->
+    <section class="content-section" id="fuzzing" aria-labelledby="fuzzing-title">
+      <h2 class="content-section__title" id="fuzzing-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Parameter Fuzzing</h2>
+      <div class="cmd-list" role="list">
+        
+        <!-- Block 1: Authenticated request saved from Burp -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Fuzz an authenticated request saved from Burp</div>
+              <div class="cmd-block__desc">Export any request from Burp (Ctrl+Shift+S in Repeater, or right-click &rarr; "Save item" in Proxy), open the saved file, and replace the value you want to fuzz with the literal word <code>FUZZ</code>. ffuf preserves cookies, CSRF tokens, JSON bodies, and custom headers that are painful to re-enter as flags. This is how professionals fuzz authenticated endpoints.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-request</span> <span class="tok-arg">request.txt</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: GET parameter fuzzing -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">GET parameter fuzzing</div>
+              <div class="cmd-block__desc">Find hidden or unlinked query parameters on an endpoint.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?FUZZ=value"</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: POST body fuzzing -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">POST body fuzzing</div>
+              <div class="cmd-block__desc">Fuzz form fields or JSON attributes inside POST request bodies.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">wordlist.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/login</span> <span class="tok-flag">-X</span> <span class="tok-val">POST</span> <span class="tok-flag">-d</span> <span class="tok-val">"user=FUZZ&amp;pass=password"</span> <span class="tok-flag">-H</span> <span class="tok-val">"Content-Type: application/x-www-form-urlencoded"</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Cluster bomb -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Cluster bomb &mdash; for every combination</div>
+              <div class="cmd-block__desc">
+                Fuzz two positions simultaneously testing every possible combination.
+                <div style="margin-top:var(--sp-1); font-size:var(--t-xs); color:var(--c-warn); font-weight:600;">&#9888;&#65039; Cluster bomb multiplies list lengths: len(A) &times; len(B) &times; …. Two lists of 100 produce 10,000 requests; three lists of 100 produce 1,000,000. Always estimate before launching against a live target.</div>
+              </div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">users.txt:W1</span> <span class="tok-flag">-w</span> <span class="tok-val">passwords.txt:W2</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/login</span> <span class="tok-flag">-d</span> <span class="tok-val">"user=W1&amp;pass=W2"</span> <span class="tok-flag">-mode</span> <span class="tok-val">clusterbomb</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 5: Pitchfork -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Pitchfork &mdash; for paired lists</div>
+              <div class="cmd-block__desc">Pitchfork pairs word N from list A with word N from list B &mdash; 100 lines &times; 100 lines = 100 iterations, not 10,000. Right choice when lists are naturally paired: leaked username-to-password dumps, credential stuff lists, or test-case matrices. <code>-mode clusterbomb</code> is the wrong mode for these.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">users.txt:W1</span> <span class="tok-flag">-w</span> <span class="tok-val">passwords.txt:W2</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/login</span> <span class="tok-flag">-X</span> <span class="tok-val">POST</span> <span class="tok-flag">-d</span> <span class="tok-val">"user=W1&amp;pass=W2"</span> <span class="tok-flag">-H</span> <span class="tok-val">"Content-Type: application/x-www-form-urlencoded"</span> <span class="tok-flag">-mode</span> <span class="tok-val">pitchfork</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Virtual Host Scanning -->
+    <section class="content-section" id="vhosts" aria-labelledby="vhosts-title">
+      <h2 class="content-section__title" id="vhosts-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Virtual Host Scanning</h2>
+      
+      <!-- Calibration note -->
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          <strong>How to pick -fs:</strong> A vhost scan only works if you know the default response size for a nonexistent host. First, request a guaranteed-invalid host and measure the response:
+          <div style="margin: var(--sp-2) 0; font-family: var(--f-mono); font-size: var(--t-xs); background: rgba(0,0,0,0.3); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.06);">
+            curl -s -H "Host: nonexistent.example.com" https://target | wc -c
+          </div>
+          The output is your <code>-fs</code> value. Or add <code>-ac</code> and skip this step entirely &mdash; ffuf will do the calibration automatically.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Manual calibration workflow -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Manual calibration workflow (measured -fs)</div>
+              <div class="cmd-block__desc">Measure the default catch-all vhost byte size with curl, then filter out all matching responses.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">curl</span> <span class="tok-flag">-s</span> <span class="tok-flag">-H</span> <span class="tok-val">"Host: nonexistent.example.com"</span> <span class="tok-arg">https://target</span> | <span class="tok-cmd">wc</span> <span class="tok-flag">-c</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-H</span> <span class="tok-val">"Host: FUZZ.target"</span> <span class="tok-flag">-fs</span> <span class="tok-val">&lt;measured-size&gt;</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">replace with curl output</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Auto-calibrated version -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Auto-calibrated vhost discovery (-ac)</div>
+              <div class="cmd-block__desc">Automatically calibrate against the target's default catch-all vhost response without manual byte measurement.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ffuf</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-H</span> <span class="tok-val">"Host: FUZZ.target"</span> <span class="tok-flag">-ac</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Response Filtering -->
+    <section class="content-section" id="filtering" aria-labelledby="filtering-title">
+      <h2 class="content-section__title" id="filtering-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Response Filtering</h2>
+      
+      <!-- Auto-calibration note -->
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          <strong>Use -ac before guessing:</strong> If you don't know the baseline response size, <code>-ac</code> measures it and filters automatically. Only reach for <code>-fs</code> / <code>-fw</code> / <code>-fl</code> when you need to filter on something <code>-ac</code> can't detect (a very specific response, or after inspecting a known pattern).
+        </div>
+      </div>
+
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Flag</th><th scope="col">Filter by</th><th scope="col">Example</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">-ac</code></td><td class="flag-desc">Auto-calibrate baseline and filter it</td><td class="flag-default">-ac</td></tr>
+            <tr><td><code class="flag-code">-fc 404,403</code></td><td class="flag-desc">Filter response codes (hide)</td><td class="flag-default">-fc 404</td></tr>
+            <tr><td><code class="flag-code">-mc 200,301</code></td><td class="flag-desc">Match response codes (show only)</td><td class="flag-default">-mc 200</td></tr>
+            <tr><td><code class="flag-code">-fs N</code></td><td class="flag-desc">Filter response size (bytes)</td><td class="flag-default">-fs 4242</td></tr>
+            <tr><td><code class="flag-code">-ms N</code></td><td class="flag-desc">Match response size</td><td class="flag-default">-ms 1234</td></tr>
+            <tr><td><code class="flag-code">-fw N</code></td><td class="flag-desc">Filter by word count</td><td class="flag-default">-fw 10</td></tr>
+            <tr><td><code class="flag-code">-fl N</code></td><td class="flag-desc">Filter by line count</td><td class="flag-default">-fl 20</td></tr>
+            <tr><td><code class="flag-code">-fr regex</code></td><td class="flag-desc">Filter by regex in response</td><td class="flag-default">-fr "not found"</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Quick Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title"><svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Quick Cheatsheet</h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Basic dir fuzz</div><div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -ac</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">With extensions</div><div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -ac -e .php,.bak,.zip</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Filter 404s</div><div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -fc 404</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">VHost scan</div><div class="cheat-cell__code">ffuf -w subs.txt -u https://target -H "Host: FUZZ.target" -ac</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Save JSON output</div><div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -o results.json -of json</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Recursive</div><div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -recursion -recursion-depth 2 -ac</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Replay through Burp</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -x http://127.0.0.1:8080 -ac</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>HTML report</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -o results.html -of html -ac</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Feed to SQLmap</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">sqlmap -u "https://target/page?param=1" --batch --dbs</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'ffuf', cmd:'ffuf -w wordlist.txt -u https://target/FUZZ -ac', desc:'Calibrated directory scan with baseline filter', target:'ffuf.html#directory' },
+  { tool:'ffuf', cmd:'ffuf -w wordlist.txt -u https://target/FUZZ -ac -e .php,.bak,.zip', desc:'Directory fuzzing with extensions and backup files', target:'ffuf.html#directory' },
+  { tool:'ffuf', cmd:'ffuf -request request.txt -w wordlist.txt -ac', desc:'Fuzz an authenticated request exported from Burp', target:'ffuf.html#fuzzing' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -mc 200 -ac', desc:'Fuzz directories restricting to HTTP 200 hits only', target:'ffuf.html#directory' },
+  { tool:'ffuf', cmd:'ffuf -w subs.txt -u https://target -H "Host: FUZZ.target" -ac', desc:'Auto-calibrated virtual host (VHost) discovery', target:'ffuf.html#vhosts' },
+  { tool:'ffuf', cmd:'ffuf -w users.txt:W1 -w passwords.txt:W2 -mode pitchfork -ac', desc:'Multi-wordlist paired attack (Pitchfork mode)', target:'ffuf.html#fuzzing' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -x http://127.0.0.1:8080 -ac', desc:'Route ffuf traffic through Burp Proxy', target:'ffuf.html#flags' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -rate 20 -ac', desc:'Rate-limited fuzzing to prevent target overload', target:'ffuf.html#flags' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -o results.json -of json', desc:'Save fuzzing results as structured JSON', target:'ffuf.html#flags' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -o results.html -of html', desc:'Generate client-ready HTML fuzzing report', target:'ffuf.html#flags' },
+  { tool:'ffuf', cmd:'ffuf -w params.txt -u "https://target/page?FUZZ=value" -ac', desc:'Fuzz hidden GET query parameters', target:'ffuf.html#fuzzing' },
+  { tool:'ffuf', cmd:'ffuf -w list.txt -u https://target/FUZZ -fc 404', desc:'Filter out 404 responses', target:'ffuf.html#filtering' }
+]);
+</script>
+</body>
+</html>

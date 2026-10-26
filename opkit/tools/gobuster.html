@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gobuster Cheatsheet — Directory, DNS &amp; VHost Enumeration | OPKIT</title>
+  <meta name="description" content="Complete Gobuster reference: dir, dns, vhost, s3, gcs, fuzz, and tftp modes, flags, wordlists, and one-click copy for all commands.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #e8a03a; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Gobuster navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/gobuster/images/gobuster-logo.svg" alt="Gobuster" onerror="this.onerror=null;this.src='../images/tools/gobuster.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Gobuster</div>
+          <div class="tool-sidebar__version">v3.6 · Go enumerator</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Common Pitfalls
+        </div>
+        <div class="sidebar-nav-item" data-section="dir">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          dir Mode
+        </div>
+        <div class="sidebar-nav-item" data-section="dns">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>
+          dns Mode
+        </div>
+        <div class="sidebar-nav-item" data-section="vhost">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          vhost Mode
+        </div>
+        <div class="sidebar-nav-item" data-section="fuzz">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          fuzz Mode
+        </div>
+        <div class="sidebar-nav-item" data-section="cloud">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+          s3 &amp; gcs Modes
+        </div>
+        <div class="sidebar-nav-item" data-section="tftp">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          tftp Mode
+        </div>
+        <div class="sidebar-nav-item" data-section="flags">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+          Common Flags
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Enumeration · Go</div>
+      <h1 class="tool-hero__title">Gobuster</h1>
+      <p class="tool-hero__desc">A fast brute-forcing tool for URIs (directories and files), DNS subdomains, virtual hosts, S3 and GCS buckets. Written in Go for high concurrency. Operates in distinct modes: dir, dns, vhost, s3, gcs, fuzz, and tftp.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">dir</span>
+        <span class="tool-hero__tag">dns</span>
+        <span class="tool-hero__tag">vhost</span>
+        <span class="tool-hero__tag">s3 / gcs</span>
+        <span class="tool-hero__tag">High Concurrency</span>
+        <span class="tool-hero__tag">--exclude-length</span>
+        <span class="tool-hero__tag">WAF Bypass</span>
+        <span class="tool-hero__tag">Cloud Enumeration</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(232, 160, 58, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(232, 160, 58, 0.08); border-bottom-color: rgba(232, 160, 58, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Three modes that cover 90% of web enumeration.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-x</span> <span class="tok-val">php,bak,old</span> <span class="tok-flag">--exclude-length</span> <span class="tok-val">&lt;false-positive-length&gt;</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Calibrated directory scan</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">vhost</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">--append-domain</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">VHost discovery</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dns</span> <span class="tok-flag">-d</span> <span class="tok-arg">target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">DNS subdomain brute-force</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Common Pitfalls Section -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <h2 class="content-section__title" id="pitfalls-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Common Pitfalls &amp; Operational Reality
+      </h2>
+
+      <!-- Warning Box: The False Positive Traps -->
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-6);">
+        <svg class="callout__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <div class="callout__title" style="color:var(--c-warn); font-size:var(--t-base);">Why is Gobuster returning 200 for everything? — The Wildcard Trap.</div>
+          <ul style="margin:0; padding-left:var(--sp-5); line-height:var(--lh-relaxed);">
+            <li style="margin-bottom:var(--sp-2);"><strong>Wildcard DNS / Catch-all responses:</strong> Many modern applications return a 200 OK with a custom "Not Found" page for every request. Gobuster will report every single word in your wordlist as a hit, making the output useless.</li>
+            <li style="margin-bottom:var(--sp-2);"><strong>The <code>--exclude-length</code> fix:</strong> To filter these out, first make a request to a guaranteed-random path (e.g. <code>curl -s -w '%{size_download}' https://target/randomxyz</code>), note the response size, and pass it to <code>--exclude-length</code>. Example: <code>--exclude-length 0</code> (for truly empty responses) or <code>--exclude-length 2899</code> (a common catch-all page size).</li>
+            <li style="margin-bottom:var(--sp-2);"><strong>vhost <code>--append-domain</code> is not optional:</strong> Without <code>--append-domain</code>, Gobuster tests the plain word as the Host header (e.g., <code>Host: admin</code>), not <code>admin.target.com</code>. It will miss every virtual host unless the base domain is appended.</li>
+            <li style="margin:0;"><strong><code>-r</code> (follow redirects) creates false hits:</strong> Enabling <code>-r</code> makes Gobuster follow 301/302 redirects, which can lead to it reporting a redirect chain as a valid directory. Leave it disabled for cleaner directory discovery.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Info Callout: Wordlist & WAF Reality -->
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <div class="callout__title" style="color:var(--c-info); font-size:var(--t-base);">Wordlists and User-Agents matter more than threads.</div>
+          <ul style="margin:0; padding-left:var(--sp-5); line-height:var(--lh-relaxed);">
+            <li style="margin-bottom:var(--sp-2);"><strong>Wordlist choice:</strong> <code>dirb/common.txt</code> is legacy. Use SecLists <code>raft-medium-directories.txt</code> (directories), <code>raft-medium-files.txt</code> (files), and <code>subdomains-top1million-5000.txt</code> (DNS/VHost).</li>
+            <li style="margin-bottom:var(--sp-2);"><strong>Default User-Agent is blocked:</strong> Gobuster's default UA is <code>gobuster/X.X</code>. Many WAFs and CDNs block this immediately. Always spoof a browser UA: <code>-a "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"</code>.</li>
+            <li style="margin:0;"><strong>Threads are aggressive:</strong> Default <code>-t 10</code> is generally fine. Increasing to <code>-t 50</code> or <code>-t 100</code> can trigger rate limits or lock accounts. Use <code>--delay 1500ms</code> for fragile targets.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. dir Mode -->
+    <section class="content-section" id="dir" aria-labelledby="dir-title">
+      <h2 class="content-section__title" id="dir-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        dir Mode — Directory &amp; File Brute-Force
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Calibrated directory scan -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Calibrated directory scan with --exclude-length</div>
+              <div class="cmd-block__desc">Filter out custom 404/catch-all response sizes to eliminate thousands of false-positive hits. Measure with: <code>curl -s -w '%{size_download}' https://target/randomxyz</code>.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">--exclude-length</span> <span class="tok-val">&lt;measured-size&gt;</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Extension-aware backup hunting -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Extension-aware backup and source code hunting</div>
+              <div class="cmd-block__desc">The highest-yield technique for finding forgotten source code, database dumps, vim swap files, and config leaks.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-x</span> <span class="tok-val">php,bak,old,backup,swp,zip,sql</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Status code filtering -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Status code filtering and blacklisting</div>
+              <div class="cmd-block__desc">Gobuster displays positive status codes (200, 204, 301, 302, 307, 401, 403) by default. Use <code>-b</code> to blacklist noise.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-s</span> <span class="tok-val">"200,204,301,302,307"</span> <span class="tok-flag">-b</span> <span class="tok-val">"403,404"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Authenticated scanning -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Authenticated directory scanning (Cookies &amp; Basic Auth)</div>
+              <div class="cmd-block__desc">Send session cookies with <code>-c</code> and HTTP Basic Auth credentials with <code>-U</code> and <code>-P</code> for authenticated enumeration.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-c</span> <span class="tok-val">"session=abc123xyz"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dir</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt</span> <span class="tok-flag">-U</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">password123</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. dns Mode -->
+    <section class="content-section" id="dns" aria-labelledby="dns-title">
+      <h2 class="content-section__title" id="dns-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        dns Mode — Subdomain Enumeration
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Standard subdomain brute-force -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard subdomain brute-force</div>
+              <div class="cmd-block__desc">Brute-force DNS subdomains using wordlists against target domain.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dns</span> <span class="tok-flag">-d</span> <span class="tok-arg">target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Resolve and display IP addresses -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Resolve and display IP addresses</div>
+              <div class="cmd-block__desc">Show discovered subdomains alongside their resolved IP addresses using <code>-i</code>.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dns</span> <span class="tok-flag">-d</span> <span class="tok-arg">target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">-i</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">resolve IPs</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Wildcard DNS handling -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Wildcard DNS detection and continuation</div>
+              <div class="cmd-block__desc">Gobuster warns and aborts if wildcard DNS is detected. Use <code>--wildcard</code> to force continuation.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dns</span> <span class="tok-flag">-d</span> <span class="tok-arg">target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">--wildcard</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 4: Custom DNS resolver -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Custom high-speed DNS resolver</div>
+              <div class="cmd-block__desc">Point DNS queries to a fast public resolver (e.g. 1.1.1.1 or 8.8.8.8) to bypass local rate limits and poisoned caches.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">dns</span> <span class="tok-flag">-d</span> <span class="tok-arg">target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">-r</span> <span class="tok-val">1.1.1.1</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. vhost Mode -->
+    <section class="content-section" id="vhost" aria-labelledby="vhost-title">
+      <h2 class="content-section__title" id="vhost-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        vhost Mode — Virtual Host Discovery
+      </h2>
+
+      <!-- Mandatory append-domain callout -->
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          <strong>--append-domain is mandatory:</strong> Without it, Gobuster tests <code>Host: word</code> instead of <code>Host: word.target.com</code>. Always pass <code>--append-domain</code> so virtual hosts match the fully qualified domain name.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Standard vhost scan -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard virtual host discovery</div>
+              <div class="cmd-block__desc">Find vhosts served on the same web server IP by mutating the HTTP Host header.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">vhost</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">--append-domain</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Exclude length filtering -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Filter catch-all vhosts with --exclude-length</div>
+              <div class="cmd-block__desc">Drop default zero-byte or static catch-all vhost responses returned by web servers.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">vhost</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">--append-domain</span> <span class="tok-flag">--exclude-length</span> <span class="tok-val">0</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Target by IP address with domain flag -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Scan vhosts directly targeting an IP address</div>
+              <div class="cmd-block__desc">Probe a specific host IP while enforcing the base domain name for Host header assembly.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">vhost</span> <span class="tok-flag">-u</span> <span class="tok-arg">http://10.10.10.1</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt</span> <span class="tok-flag">--domain</span> <span class="tok-arg">target.com</span> <span class="tok-flag">--append-domain</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Compatibility note:</span> <code>--domain</code> in vhost mode requires Gobuster 3.6+. On older versions (3.0–3.5), add <code>target.com</code> to <code>/etc/hosts</code> pointing to the IP, then use <code>-u http://target.com</code> instead.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. fuzz Mode -->
+    <section class="content-section" id="fuzz" aria-labelledby="fuzz-title">
+      <h2 class="content-section__title" id="fuzz-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        fuzz Mode — URL &amp; Parameter Fuzzing
+      </h2>
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          Gobuster's <code>fuzz</code> mode replaces the <code>FUZZ</code> keyword anywhere in the URL, custom request headers, or body data &mdash; enabling lightweight parameter discovery.
+        </div>
+      </div>
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">GET parameter and endpoint fuzzing</div>
+              <div class="cmd-block__desc">Substitute the <code>FUZZ</code> keyword to discover hidden query parameters or unlinked endpoints.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">fuzz</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?FUZZ=test"</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt</span> <span class="tok-flag">--exclude-length</span> <span class="tok-val">&lt;measured-size&gt;</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">POST body parameter fuzzing</div>
+              <div class="cmd-block__desc">Fuzz authentication form fields or API parameters inside HTTP POST bodies using <code>-X POST</code> and <code>-d</code>.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">fuzz</span> <span class="tok-flag">-u</span> <span class="tok-arg">https://target/login</span> <span class="tok-flag">-X</span> <span class="tok-val">POST</span> <span class="tok-flag">-d</span> <span class="tok-val">"user=FUZZ&amp;pass=test"</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Usernames/top-usernames-shortlist.txt</span> <span class="tok-flag">-H</span> <span class="tok-val">"Content-Type: application/x-www-form-urlencoded"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. s3 & gcs Modes -->
+    <section class="content-section" id="cloud" aria-labelledby="cloud-title">
+      <h2 class="content-section__title" id="cloud-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        s3 &amp; gcs Modes — Cloud Bucket Enumeration
+      </h2>
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+        <div class="callout__body">
+          Enumerate publicly accessible, misconfigured, or listing-enabled cloud storage buckets on AWS and Google Cloud Platform without cloud credentials.
+        </div>
+      </div>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: S3 -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Amazon S3 bucket enumeration</div>
+              <div class="cmd-block__desc">Brute-force public Amazon S3 bucket names using wordlists to identify readable or writable buckets.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">s3</span> <span class="tok-flag">-w</span> <span class="tok-val">bucket-names.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: GCS -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Google Cloud Storage (GCS) enumeration</div>
+              <div class="cmd-block__desc">Brute-force public Google Cloud Storage bucket names to spot exposed assets.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">gcs</span> <span class="tok-flag">-w</span> <span class="tok-val">bucket-names.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. tftp Mode -->
+    <section class="content-section" id="tftp" aria-labelledby="tftp-title">
+      <h2 class="content-section__title" id="tftp-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        tftp Mode — TFTP File Enumeration
+      </h2>
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Enumerate files on a TFTP server</div>
+              <div class="cmd-block__desc">Brute-force filenames on UDP port 69 against a TFTP server (common in network appliance and PXE boot environments).</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">gobuster</span> <span class="tok-val">tftp</span> <span class="tok-flag">-s</span> <span class="tok-arg">tftp.target.com</span> <span class="tok-flag">-w</span> <span class="tok-val">/usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Common Flags -->
+    <section class="content-section" id="flags" aria-labelledby="flags-title">
+      <h2 class="content-section__title" id="flags-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+        Common Flags
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Flag</th><th scope="col">Description</th><th scope="col">Default</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">-u URL</code></td><td class="flag-desc">Target URL (dir, vhost, fuzz modes)</td><td class="flag-default">required</td></tr>
+            <tr><td><code class="flag-code">-w wordlist</code></td><td class="flag-desc">Path to wordlist file</td><td class="flag-default">required</td></tr>
+            <tr><td><code class="flag-code">--exclude-length N</code></td><td class="flag-desc">Filter out response body sizes (supports comma/range, e.g. 0,100-200)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-x exts</code></td><td class="flag-desc">File extensions to search for in dir mode (e.g. php,bak,zip)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-a "User-Agent"</code></td><td class="flag-desc">Custom HTTP User-Agent string (bypasses default gobuster/X.X WAF blocks)</td><td class="flag-default">gobuster/X.X</td></tr>
+            <tr><td><code class="flag-code">-s codes</code></td><td class="flag-desc">Positive status codes to show</td><td class="flag-default">200,204,301,302,307,401,403</td></tr>
+            <tr><td><code class="flag-code">-b codes</code></td><td class="flag-desc">Negative status codes to blacklist and hide</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-t N</code></td><td class="flag-desc">Number of concurrent threads</td><td class="flag-default">10</td></tr>
+            <tr><td><code class="flag-code">--delay delay</code></td><td class="flag-desc">Time each thread waits between requests (e.g. 1500ms)</td><td class="flag-default">0</td></tr>
+            <tr><td><code class="flag-code">-r</code></td><td class="flag-desc">Follow redirects (warning: creates false hits; keep disabled for raw dir discovery)</td><td class="flag-default">false</td></tr>
+            <tr><td><code class="flag-code">-k</code></td><td class="flag-desc">Skip TLS / SSL certificate verification</td><td class="flag-default">false</td></tr>
+            <tr><td><code class="flag-code">-c "cookie=val"</code></td><td class="flag-desc">Send cookies for authenticated directory busting</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-U user -P pass</code></td><td class="flag-desc">HTTP Basic Auth credentials</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-d, --domain</code></td><td class="flag-desc">Target domain for dns mode</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">--domain domain</code></td><td class="flag-desc">Target domain override for vhost mode (requires v3.6+)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">--append-domain</code></td><td class="flag-desc">Append base domain to wordlist words in vhost mode (mandatory for vhosts)</td><td class="flag-default">false</td></tr>
+            <tr><td><code class="flag-code">--wildcard</code></td><td class="flag-desc">Force continue when wildcard DNS is detected in dns mode</td><td class="flag-default">false</td></tr>
+            <tr><td><code class="flag-code">-p, --proxy URL</code></td><td class="flag-desc">HTTP/SOCKS5 proxy (e.g. http://127.0.0.1:8080)</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-o file</code></td><td class="flag-desc">Output file to save results</td><td class="flag-default">—</td></tr>
+            <tr><td><code class="flag-code">-q</code></td><td class="flag-desc">Quiet mode (suppress ASCII banner and progress output)</td><td class="flag-default">false</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8. Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Calibrated dir</div><div class="cheat-cell__code">gobuster dir -u https://target -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -x php,bak,old</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">With extensions</div><div class="cheat-cell__code">gobuster dir -u https://target -w list.txt -x php,bak,old</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">DNS subdomain</div><div class="cheat-cell__code">gobuster dns -d target.com -w subdomains.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">VHost discovery</div><div class="cheat-cell__code">gobuster vhost -u https://target -w subs.txt --append-domain</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Filter length</div><div class="cheat-cell__code">gobuster dir -u https://target -w list.txt --exclude-length 2899</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">WAF bypass UA</div><div class="cheat-cell__code">gobuster dir -u https://target -w list.txt -a "Mozilla/5.0"</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Replay through Burp</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">gobuster dir -u https://target -w list.txt --proxy http://127.0.0.1:8080</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>ffuf for recursion</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">ffuf -w list.txt -u https://target/FUZZ -recursion -recursion-depth 2 -ac</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>Feed to SQLmap</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">sqlmap -u "https://target/page?param=1" --batch --dbs</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'Gobuster', cmd:'gobuster dir -u https://target -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -x php,bak,old --exclude-length 2899', desc:'Calibrated directory scan with extension hunting', target:'gobuster.html#dir' },
+  { tool:'Gobuster', cmd:'gobuster vhost -u https://target -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain', desc:'Virtual host discovery with appended domain', target:'gobuster.html#vhost' },
+  { tool:'Gobuster', cmd:'gobuster dns -d target.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -i', desc:'DNS subdomain brute-force with IP resolution', target:'gobuster.html#dns' },
+  { tool:'Gobuster', cmd:'gobuster fuzz -u "https://target/page?FUZZ=test" -w params.txt', desc:'URL and parameter fuzzing mode', target:'gobuster.html#fuzz' },
+  { tool:'Gobuster', cmd:'gobuster s3 -w bucket-names.txt', desc:'Enumerate public Amazon S3 buckets', target:'gobuster.html#cloud' },
+  { tool:'Gobuster', cmd:'gobuster gcs -w bucket-names.txt', desc:'Enumerate Google Cloud Storage buckets', target:'gobuster.html#cloud' },
+  { tool:'Gobuster', cmd:'gobuster tftp -s tftp.target.com -w filenames.txt', desc:'Brute-force filenames on a TFTP server', target:'gobuster.html#tftp' },
+  { tool:'Gobuster', cmd:'gobuster dir -u https://target -w list.txt -a "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"', desc:'WAF bypass with custom browser User-Agent', target:'gobuster.html#flags' },
+  { tool:'Gobuster', cmd:'gobuster dir -u https://target -w list.txt -b 403,404', desc:'Blacklist unwanted status codes', target:'gobuster.html#dir' },
+  { tool:'Gobuster', cmd:'gobuster dir -u https://target -w list.txt --delay 1500ms', desc:'Rate-limited scanning with thread delays', target:'gobuster.html#flags' },
+  { tool:'Gobuster', cmd:'gobuster dir -u https://target -w list.txt -c "session=xyz"', desc:'Authenticated directory scanning with cookies', target:'gobuster.html#dir' },
+  { tool:'Gobuster', cmd:'gobuster dns -d target.com -w subdomains.txt --wildcard', desc:'Force continue when wildcard DNS is detected', target:'gobuster.html#dns' }
+]);
+</script>
+</body>
+</html>

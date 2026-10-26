@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hydra Cheatsheet — Lockout-Safe Password Spraying &amp; Protocols | OPKIT</title>
+  <meta name="description" content="Complete Hydra reference: Lockout-safe password spraying, timing &amp; evasion (-W), SSH, HTTP POST/GET forms with CSRF tokens, RDP, SMB, and modern alternatives.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #e85a4a; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="12" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="Hydra navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/hydra/images/hydra-logo.svg" alt="Hydra" onerror="this.onerror=null;this.src='../images/tools/hydra.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">Hydra</div>
+          <div class="tool-sidebar__version">v9.5 · Online Brute-forcer</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Navigation</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Pitfalls &amp; Safety
+        </div>
+        <div class="sidebar-nav-item" data-section="quick-start">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          First 3 Commands
+        </div>
+        <div class="sidebar-nav-item" data-section="flags">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Core Flags
+        </div>
+        <div class="sidebar-nav-item" data-section="spraying">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Password Spraying
+        </div>
+        <div class="sidebar-nav-item" data-section="timing">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Timing &amp; Evasion
+        </div>
+        <div class="sidebar-nav-item" data-section="usage">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          SSH / FTP / Telnet
+        </div>
+        <div class="sidebar-nav-item" data-section="http">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          HTTP Forms
+        </div>
+        <div class="sidebar-nav-item" data-section="rdp-smb">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+          RDP / SMB / Databases
+        </div>
+        <div class="sidebar-nav-item" data-section="alternatives">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Modern Alternatives
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Online Credential Testing · Brute-Force &amp; Spraying</div>
+      <h1 class="tool-hero__title">Hydra</h1>
+      <p class="tool-hero__desc">A high-performance parallelized authentication attack tool supporting over 50 protocols. Master lockout-safe password spraying, low-and-slow timing controls, CSRF token handling, and multi-protocol credential testing across SSH, HTTP, RDP, SMB, and database backends.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Password Spraying</span>
+        <span class="tool-hero__tag">Lockout-Safe</span>
+        <span class="tool-hero__tag">Timing (-W)</span>
+        <span class="tool-hero__tag">SSH</span>
+        <span class="tool-hero__tag">HTTP Forms</span>
+        <span class="tool-hero__tag">CSRF Handling</span>
+        <span class="tool-hero__tag">RDP &amp; SMB</span>
+        <span class="tool-hero__tag">NetExec &amp; Kerbrute</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" id="quick-start" style="margin-bottom: var(--sp-6); border-color: rgba(232, 90, 74, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(232, 90, 74, 0.08); border-bottom-color: rgba(232, 90, 74, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Start with a spray to avoid lockouts, then brute-force a single account if needed.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-p</span> <span class="tok-arg">'Welcome@2024'</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">30</span> <span class="tok-arg">ssh://10.0.0.5</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Password spray (one password, many users)</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-W</span> <span class="tok-val">5</span> <span class="tok-arg">ssh://10.0.10.1</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Targeted SSH brute-force (single user)</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-W</span> <span class="tok-val">5</span> <span class="tok-arg">10.0.10.1</span> <span class="tok-val">http-post-form</span> <span class="tok-arg">"/login:user=^USER^&amp;pass=^PASS^:F=Invalid"</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">HTTP form attack (calibrated -t 4 -W 5)</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Pitfalls & Safety -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <h2 class="content-section__title" id="pitfalls-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Critical Pitfalls &amp; Safety
+      </h2>
+
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Why is Hydra failing (or locking accounts)? — The spray, timing, and CSRF traps.</strong>
+          <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+            <li><strong>Account lockouts are real and immediate:</strong> A traditional brute-force (many passwords against one user) will trigger lockout policies (often 3–5 attempts) and alert defenders within minutes. Password spraying (one password against many users) is the standard technique to avoid this.</li>
+            <li><strong>-t 16 is aggressive and unreliable:</strong> High thread counts cause failures on RDP and SSH, and trip rate-limiting on web apps. Use <code>-t 4</code> or lower for SSH/RDP, and <code>-t 1</code> for spraying to stay under the radar.</li>
+            <li><strong>Hydra cannot handle CSRF tokens natively:</strong> If a login form includes a dynamic CSRF token, Hydra will fail because the token changes on every request. You must manually extract a valid token and session cookie and inject them into the command, or Hydra will either falsely report success or fail completely.</li>
+            <li><strong>Default Hydra against modern services often fails:</strong> Lockouts, rate limiting, CAPTCHAs, and SIEM detection rules mean stock Hydra is best used against internal, legacy, or default-credential environments.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Info Callout: Spraying reality -->
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">Spraying beats brute-force in 2026.</strong>
+          Password spraying tests one or two common passwords (e.g., <code>Welcome@2024</code>, <code>CompanyName@2024</code>) against every username in a list. Each user sees only one failed attempt, so lockouts don't trigger. Use the <code>-u</code> flag to loop over users first (instead of passwords), and use <code>-W</code> to insert a wait between attempts.
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Flags -->
+    <section class="content-section" id="flags" aria-labelledby="flags-title">
+      <h2 class="content-section__title" id="flags-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        Core Flags
+      </h2>
+      <table class="flags-table" role="table">
+        <thead><tr><th scope="col">Flag</th><th scope="col">Description</th><th scope="col">Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td><code class="flag-code">-t N</code></td><td class="flag-desc">Parallel worker tasks / threads</td><td class="flag-default">Use 4 for SSH/RDP, 1 for spraying to avoid dropouts &amp; lockouts</td></tr>
+          <tr><td><code class="flag-code">-W N</code></td><td class="flag-desc">Wait time (seconds) between attempts</td><td class="flag-default">Essential for lockout avoidance. Try -W 30 for spraying</td></tr>
+          <tr><td><code class="flag-code">-u</code></td><td class="flag-desc">Loop users first (instead of passwords)</td><td class="flag-default">Enables spraying: tests 1 password across all users before advancing</td></tr>
+          <tr><td><code class="flag-code">-e nsr</code></td><td class="flag-desc">Try null (n), same as user (s), reversed (r)</td><td class="flag-default">Quick win heuristics for weak, blank, or default provisioned passwords</td></tr>
+          <tr><td><code class="flag-code">-f</code></td><td class="flag-desc">Stop after first valid credential found</td><td class="flag-default">Saves time and halts attack immediately upon valid foothold</td></tr>
+          <tr><td><code class="flag-code">-o file</code></td><td class="flag-desc">Write valid credentials to output file</td><td class="flag-default">Evidence logging and post-engagement reporting</td></tr>
+          <tr><td><code class="flag-code">-s port</code></td><td class="flag-desc">Non-default target port</td><td class="flag-default">Target non-standard bindings (e.g., SSH on 2222 or web on 8080)</td></tr>
+          <tr><td><code class="flag-code">-l user</code></td><td class="flag-desc">Single target username</td><td class="flag-default">Focus attack on specific known account (e.g. admin, root)</td></tr>
+          <tr><td><code class="flag-code">-L file</code></td><td class="flag-desc">Username list file</td><td class="flag-default">Target multiple harvested users or employee directories</td></tr>
+          <tr><td><code class="flag-code">-p pass</code></td><td class="flag-desc">Single candidate password</td><td class="flag-default">Required for spraying known seasonal or company passwords</td></tr>
+          <tr><td><code class="flag-code">-P file</code></td><td class="flag-desc">Password dictionary list file</td><td class="flag-default">Standard brute-force against single user (e.g. rockyou.txt)</td></tr>
+          <tr><td><code class="flag-code">-v / -V</code></td><td class="flag-desc">Verbose / very verbose mode</td><td class="flag-default">-V displays every user:password attempt in real time</td></tr>
+          <tr><td><code class="flag-code">-x min:max:chars</code></td><td class="flag-desc">Brute-force charset generation</td><td class="flag-default">Generates mask passwords in-memory (e.g. -x 6:8:a1)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Password Spraying (Lockout-Safe) -->
+    <section class="content-section" id="spraying" aria-labelledby="spraying-title">
+      <h2 class="content-section__title" id="spraying-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Password Spraying (Lockout-Safe)
+      </h2>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Single Password Spray -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Password spraying — one password, many users</div>
+              <div class="cmd-block__desc">This tries the single password Welcome@2024 against every username in users.txt. -t 1 sends one attempt at a time, and -W 30 waits 30 seconds between attempts. No single account accumulates multiple failures, so lockout policies are not triggered.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-p</span> <span class="tok-arg">'Welcome@2024'</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">30</span> <span class="tok-arg">ssh://10.0.10.5</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Single-password spray with 30s inter-attempt delay</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Lockout Protection:</span> When spraying 500 enterprise users with <code>-t 1 -W 30</code>, each attempt tests a different account. No account experiences a second failed attempt until all 500 have been tried (over 4 hours later), cleanly evading rolling lockout counters.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Multi-Password Spray with -u -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Multi-password spraying with user looping (-u)</div>
+              <div class="cmd-block__desc">Loop through all users for password 1 before advancing to password 2 to avoid locking individual accounts.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-P</span> <span class="tok-val">seasonal_passwords.txt</span> <span class="tok-flag">-u</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">20</span> <span class="tok-arg">ssh://10.0.10.5</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Test each candidate password across all users before next password</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">service_accounts.txt</span> <span class="tok-flag">-e</span> <span class="tok-val">nsr</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">10</span> <span class="tok-flag">-o</span> <span class="tok-val">spray_found.txt</span> <span class="tok-arg">ssh://10.0.10.5</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Spray blank, username-as-password, and reversed username</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timing & Evasion -->
+    <section class="content-section" id="timing" aria-labelledby="timing-title">
+      <h2 class="content-section__title" id="timing-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Timing &amp; Evasion
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Slow and Low Timing -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Slow-and-low timing (-W 60)</div>
+              <div class="cmd-block__desc">One attempt per minute. Stays under most rate-limiting thresholds. Use this when you know a lockout policy exists (e.g., 5 attempts per 15 minutes).</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">passwords.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">60</span> <span class="tok-arg">ssh://10.0.10.5</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">1 attempt per minute to stay under IDS/SIEM alert limits</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Detection Thresholds:</span> Most Security Operations Centers (SOCs) configure alerts for &gt;5 failed logins within 10 minutes from a single IP. An inter-request delay of <code>-W 60</code> keeps rate below typical static threshold triggers.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Calibrated SSH stability -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Calibrated SSH connection stability (-t 4)</div>
+              <div class="cmd-block__desc">Prevent connection drops caused by OpenSSH MaxStartups throttling.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-W</span> <span class="tok-val">5</span> <span class="tok-arg">ssh://10.0.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Conservative thread count (4) with 5s delay prevents packet drops</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">2</span> <span class="tok-flag">-W</span> <span class="tok-val">10</span> <span class="tok-arg">10.0.10.1</span> <span class="tok-val">http-post-form</span> <span class="tok-arg">"/login:u=^USER^&amp;p=^PASS^:F=fail:H=User-Agent\: Mozilla/5.0"</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Custom User-Agent header to evade default WAF blocklists</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SSH / FTP / Telnet -->
+    <section class="content-section" id="usage" aria-labelledby="usage-title">
+      <h2 class="content-section__title" id="usage-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        SSH / FTP / Telnet
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: SSH Brute Force -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">SSH credential brute-force (-f stop on first)</div>
+              <div class="cmd-block__desc">Target a known administrator account with calibrated thread limits.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">/usr/share/wordlists/rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-f</span> <span class="tok-arg">ssh://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Stop immediately upon discovering correct SSH password</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-W</span> <span class="tok-val">3</span> <span class="tok-flag">-o</span> <span class="tok-val">found_ssh.txt</span> <span class="tok-arg">ssh://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Multi-user test logging successful creds to disk</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Evidence Trail:</span> Always use <code>-o &lt;file&gt;</code> — the resulting log records discovered credentials and timestamps, providing an audit trail for your penetration testing report.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: FTP Brute Force -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">FTP anonymous &amp; dictionary authentication</div>
+              <div class="cmd-block__desc">Verify anonymous access or execute parallel credential testing on FTP.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">anonymous</span> <span class="tok-flag">-p</span> <span class="tok-val">""</span> <span class="tok-arg">ftp://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Test for open unauthenticated FTP anonymous access</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">8</span> <span class="tok-arg">ftp://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">FTP dictionary test against harvested user list</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Non-standard Ports & Telnet -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Non-standard port targeting &amp; Telnet legacy testing</div>
+              <div class="cmd-block__desc">Specify custom service ports using -s or URL colon notation.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">root</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-s</span> <span class="tok-val">2222</span> <span class="tok-arg">ssh://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Target SSH running on non-default port 2222</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-arg">telnet://10.10.10.1:2323</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Target Telnet device console with custom port</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HTTP Forms & CSRF Handling -->
+    <section class="content-section" id="http" aria-labelledby="http-title">
+      <h2 class="content-section__title" id="http-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        HTTP Forms &amp; CSRF Handling
+      </h2>
+
+      <!-- CSRF Token Warning Callout -->
+      <div class="callout callout--warn" role="alert" style="margin-bottom:var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-warn);">CSRF token check: Why Hydra fails on modern login forms.</strong>
+          If the login form includes a hidden <code>user_token</code> or <code>csrf_token</code> field, Hydra will fail. Because Hydra cannot parse dynamic HTML tokens per request, you must first extract a valid token and session cookie with <code>curl</code>, then inject them into the command.
+        </div>
+      </div>
+
+      <!-- CSRF Extraction Workflow Block -->
+      <div class="cmd-block is-open" style="margin-bottom:var(--sp-4);" role="region" aria-label="CSRF Token Extraction Workflow">
+        <div class="cmd-block__head">
+          <div>
+            <div class="cmd-block__label">CSRF token extraction &amp; injection workflow</div>
+            <div class="cmd-block__desc">Pre-fetch CSRF token and session cookies before launching Hydra against protected forms.</div>
+          </div>
+          <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="cmd-block__body">
+          <div class="code-line">
+            <span class="code-line__prompt" aria-hidden="true">$</span>
+            <code class="code-line__code"><span class="tok-cmd">CSRF</span>=$(<span class="tok-cmd">curl</span> <span class="tok-flag">-s</span> <span class="tok-flag">-c</span> <span class="tok-val">cookie.txt</span> <span class="tok-arg">"http://10.0.10.1/login.php"</span> <span class="tok-pipe">|</span> <span class="tok-cmd">awk</span> <span class="tok-flag">-F</span> <span class="tok-val">'value='</span> <span class="tok-arg">'/user_token/ {print $2}'</span> <span class="tok-pipe">|</span> <span class="tok-cmd">cut</span> <span class="tok-flag">-d</span> <span class="tok-val">"'"</span> <span class="tok-flag">-f2</span>)</code>
+            <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Step 1: Extract CSRF token and save session cookie</span>
+            <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+          </div>
+          <div class="code-line">
+            <span class="code-line__prompt" aria-hidden="true">$</span>
+            <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">passwords.txt</span> <span class="tok-arg">10.0.10.1</span> <span class="tok-val">http-post-form</span> <span class="tok-arg">"/login.php:username=^USER^&amp;password=^PASS^&amp;user_token=${CSRF}:F=Invalid"</span></code>
+            <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Step 2: Inject extracted CSRF variable into HTTP POST form</span>
+            <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout--info" role="note" style="margin-bottom:var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong>Syntax Breakdown for http-post-form:</strong> <code>/url:parameters:condition[:optional_headers]</code>. Use <code>F=failed_text</code> (stop when string is NOT found) or <code>S=success_text</code> (stop when string IS found). Use <code>^USER^</code> and <code>^PASS^</code> as placeholders.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Standard POST Form -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard HTTP POST form brute-force</div>
+              <div class="cmd-block__desc">Attack web application login forms with custom POST parameters and failure condition.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-flag">-W</span> <span class="tok-val">5</span> <span class="tok-arg">10.0.10.1</span> <span class="tok-val">http-post-form</span> <span class="tok-arg">"/login.php:user=^USER^&amp;pass=^PASS^:F=Invalid credentials"</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">HTTP POST attack calibrated with -t 4 -W 5 to prevent web rate-limiting</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-arg">10.0.10.1</span> <span class="tok-val">https-post-form</span> <span class="tok-arg">"/admin/login:username=^USER^&amp;password=^PASS^:S=302:H=Cookie\: PHPSESSID=abc123"</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">HTTPS attack with session cookie detecting 302 redirect on success</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: HTTP Basic & Digest Auth -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">HTTP Basic &amp; Digest authentication (401 Unauthorized)</div>
+              <div class="cmd-block__desc">For web servers, routers, and webcams protected by HTTP 401 modal authentication.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-arg">http-get://10.0.10.1/admin/</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">HTTP Basic auth over cleartext HTTP</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">admin</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-arg">https-get://10.0.10.1/manager/html</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">HTTPS Basic auth (Tomcat Web Application Manager)</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RDP / SMB / Databases -->
+    <section class="content-section" id="rdp-smb" aria-labelledby="rdp-smb-title">
+      <h2 class="content-section__title" id="rdp-smb-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+        RDP / SMB / Databases
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: RDP -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">RDP brute-force (Remote Desktop Protocol — Port 3389)</div>
+              <div class="cmd-block__desc">Windows Remote Desktop requires low concurrency (-t 1 or -t 2) and generous delay to avoid crashing FreeRDP or tripping event alarms.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">Administrator</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">10</span> <span class="tok-arg">rdp://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Single-threaded with 10s wait (6/min to avoid Event 4625 alerting)</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">"CORP\admin"</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">1</span> <span class="tok-flag">-W</span> <span class="tok-val">10</span> <span class="tok-arg">rdp://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Domain credential format with NetBIOS domain prefix</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites &amp; Alerting:</span> Requires <code>freerdp2-x11</code> (install via <code>sudo apt install -y freerdp2-x11</code>). On monitored Windows targets, maintain <code>-W 10</code> or higher (6 attempts/minute) to prevent rapid Event ID 4625 bursts that trip SIEM threshold alerts.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: SMB -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">SMB Windows share &amp; domain credential testing</div>
+              <div class="cmd-block__desc">Audit SMB / CIFS service (port 445) across domain and standalone hosts.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-L</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-P</span> <span class="tok-val">pass.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">2</span> <span class="tok-arg">smb://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">SMB dictionary attack with 2 concurrent worker tasks</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">"DOMAIN\svc_backup"</span> <span class="tok-flag">-p</span> <span class="tok-arg">'Spring2026!'</span> <span class="tok-arg">smb://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Single credential validation on SMB endpoint</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Hydra's <code>smb://</code> module requires Samba client libraries — on minimal or container environments, install with <code>sudo apt install -y smbclient libsmbclient</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Databases -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Database backend authentication (MySQL &amp; PostgreSQL)</div>
+              <div class="cmd-block__desc">Test database administrative credentials exposed on default listening ports.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">root</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-arg">mysql://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">MySQL administrative root credential testing</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hydra</span> <span class="tok-flag">-l</span> <span class="tok-val">postgres</span> <span class="tok-flag">-P</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-t</span> <span class="tok-val">4</span> <span class="tok-arg">postgres://10.10.10.1</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">PostgreSQL superuser account testing</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modern Alternatives -->
+    <section class="content-section" id="alternatives" aria-labelledby="alternatives-title">
+      <h2 class="content-section__title" id="alternatives-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Modern Alternatives — NetExec, Kerbrute &amp; Legba
+      </h2>
+
+      <table class="flags-table" role="table" style="margin-bottom:var(--sp-5);">
+        <thead><tr><th scope="col">Tool</th><th scope="col">Primary Use Case</th><th scope="col">Why it's better than Hydra</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code class="flag-code">NetExec (nxc)</code></td>
+            <td class="flag-desc">Active Directory / SMB / SSH / WinRM spraying</td>
+            <td class="flag-default">Built natively for spraying across whole subnets at scale without accidental lockouts</td>
+          </tr>
+          <tr>
+            <td><code class="flag-code">Kerbrute</code></td>
+            <td class="flag-desc">Kerberos pre-authentication spraying</td>
+            <td class="flag-default">Stealthier in AD; checks pre-auth against KDC, avoiding noisy Event ID 4625 failed logins</td>
+          </tr>
+          <tr>
+            <td><code class="flag-code">Legba</code></td>
+            <td class="flag-desc">High-speed modern multi-protocol brute-force</td>
+            <td class="flag-default">Rust async engine benchmarked 4.5x–55x faster than Hydra with native CSRF extraction</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: NetExec -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">NetExec (nxc) — Subnet password spraying at scale</div>
+              <div class="cmd-block__desc">The gold standard tool for enterprise Active Directory, SMB, and SSH spraying without locking accounts. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: <code>pipx install netexec</code> (or <code>apt install netexec</code> on Kali 2024.2+)</span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nxc</span> <span class="tok-arg">ssh</span> <span class="tok-val">192.168.1.0/24</span> <span class="tok-flag">-u</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-p</span> <span class="tok-arg">'Password1!'</span> <span class="tok-flag">--no-bruteforce</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Spray one password across entire subnet without multiple failed attempts per user</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">nxc</span> <span class="tok-arg">smb</span> <span class="tok-val">10.0.10.0/24</span> <span class="tok-flag">-u</span> <span class="tok-val">users.txt</span> <span class="tok-flag">-p</span> <span class="tok-arg">'Welcome@2024'</span> <span class="tok-flag">--continue-on-success</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">SMB enterprise spray with immediate Pwn3d! admin notification</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Install via <code>pipx install netexec</code> across Linux distributions, or <code>sudo apt install -y netexec</code> on Kali Linux 2024.2+.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Kerbrute -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Kerbrute — Active Directory Kerberos pre-auth spraying</div>
+              <div class="cmd-block__desc">Validate credentials directly against Kerberos Key Distribution Center (KDC) over UDP port 88. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: GitHub Release binary</span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">kerbrute</span> <span class="tok-arg">passwordspray</span> <span class="tok-flag">-d</span> <span class="tok-val">corp.local</span> <span class="tok-flag">--dc</span> <span class="tok-val">10.0.10.2</span> <span class="tok-val">users.txt</span> <span class="tok-arg">'Welcome@2024'</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Kerberos pre-authentication spray avoiding Windows NTLM event noise</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Download pre-compiled binary from <code>github.com/ropnop/kerbrute/releases</code> and install to <code>/usr/local/bin/kerbrute</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Legba -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Legba — Modern high-throughput asynchronous engine</div>
+              <div class="cmd-block__desc">Written in Rust: combines memory safety, asynchronous I/O, and automated CSRF parsing. <span style="display:inline-block; margin-top:2px; color:var(--c-accent); font-weight:500;">Install: <code>cargo install --git https://github.com/evilsocket/legba</code> (or GitHub binary)</span></div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">legba</span> <span class="tok-arg">ssh</span> <span class="tok-flag">--target</span> <span class="tok-val">10.0.10.1:22</span> <span class="tok-flag">--username</span> <span class="tok-val">admin</span> <span class="tok-flag">--wordlist</span> <span class="tok-val">rockyou.txt</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">High-speed asynchronous SSH brute-force with automatic backoff</span>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Prerequisites:</span> Install via <code>cargo install --git https://github.com/evilsocket/legba</code> or download pre-compiled release binaries from <code>github.com/evilsocket/legba/releases</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Password Spray</div><div class="cheat-cell__code">hydra -L users.txt -p 'Welcome@2024' -t 1 -W 30 ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Targeted SSH Brute</div><div class="cheat-cell__code">hydra -l admin -P rockyou.txt -t 4 -W 5 ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">HTTP POST Form</div><div class="cheat-cell__code">hydra -l admin -P list.txt -t 4 -W 5 target http-post-form "/login:u=^USER^&amp;p=^PASS^:F=fail"</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">HTTP Basic Auth</div><div class="cheat-cell__code">hydra -l admin -P rockyou.txt -t 4 -W 5 http-get://target/admin</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">RDP Low Concurrency</div><div class="cheat-cell__code">hydra -l Administrator -P rockyou.txt -t 1 -W 10 rdp://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">SMB Windows Cred</div><div class="cheat-cell__code">hydra -L users.txt -P pass.txt -t 2 smb://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Stop on First Cred</div><div class="cheat-cell__code">hydra -l user -P list.txt -f ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Custom Service Port</div><div class="cheat-cell__code">hydra -l user -P list.txt -s 2222 ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Loop Users First</div><div class="cheat-cell__code">hydra -L users.txt -P pass.txt -u -t 1 -W 30 ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label"><span>Null / Same / Rev</span><span style="font-size:10px; color:var(--c-muted); margin-left:var(--sp-1);">-e alone works (no -P needed)</span></div><div class="cheat-cell__code">hydra -l user -e nsr ssh://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">MySQL Database</div><div class="cheat-cell__code">hydra -l root -P rockyou.txt -t 4 mysql://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Postgres Database</div><div class="cheat-cell__code">hydra -l postgres -P rockyou.txt -t 4 postgres://target</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Output to File</div><div class="cheat-cell__code">hydra -L users.txt -P pass.txt -o creds.txt ssh://target</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Nmap to Hydra</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">nmap -sV -p22 &lt;target&gt;  &rarr;  hydra -l root -P rockyou.txt ssh://&lt;target&gt;</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Hydra to NetExec</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">nxc smb &lt;target&gt; -u users.txt -p 'Password1!' --no-bruteforce</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Hydra to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">john --wordlist=rockyou.txt hashes.txt</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'Hydra', cmd:'hydra -L users.txt -p \'Welcome@2024\' -t 1 -W 30 ssh://10.0.0.5', desc:'Password spray across user list with 30s inter-attempt delay', target:'hydra.html#spraying' },
+  { tool:'Hydra', cmd:'hydra -l admin -P rockyou.txt -t 4 -W 5 ssh://10.0.10.1', desc:'Targeted SSH brute-force with thread limits to prevent dropped packets', target:'hydra.html#usage' },
+  { tool:'Hydra', cmd:'hydra -l admin -P rockyou.txt -t 4 -W 5 10.0.10.1 http-post-form "/login:user=^USER^&pass=^PASS^:F=Invalid"', desc:'HTTP POST login form brute-force with calibrated -t 4 -W 5', target:'hydra.html#http' },
+  { tool:'Hydra', cmd:'hydra -l admin -P passwords.txt -t 1 -W 60 ssh://10.0.10.5', desc:'Slow-and-low timing evasion (1 attempt/min) to stay under IDS thresholds', target:'hydra.html#timing' },
+  { tool:'Hydra', cmd:'hydra -L users.txt -P seasonal_passwords.txt -u -t 1 -W 20 ssh://10.0.10.5', desc:'Multi-password spraying looping users first (-u) to avoid account lockouts', target:'hydra.html#spraying' },
+  { tool:'Hydra', cmd:'hydra -l Administrator -P rockyou.txt -t 1 -W 10 rdp://10.10.10.1', desc:'RDP single-threaded credential testing avoiding FreeRDP crashes & 4625 bursts', target:'hydra.html#rdp-smb' },
+  { tool:'Hydra', cmd:'hydra -L users.txt -P pass.txt -t 2 smb://10.10.10.1', desc:'SMB Windows share & domain credential testing', target:'hydra.html#rdp-smb' },
+  { tool:'Hydra', cmd:'nxc ssh 192.168.1.0/24 -u users.txt -p \'Password1!\' --no-bruteforce', desc:'NetExec subnet-wide credential spray without account lockouts', target:'hydra.html#alternatives' },
+  { tool:'Hydra', cmd:'kerbrute passwordspray -d corp.local --dc 10.0.10.2 users.txt \'Welcome@2024\'', desc:'Kerbrute Kerberos pre-authentication spray avoiding NTLM event noise', target:'hydra.html#alternatives' },
+  { tool:'Hydra', cmd:'CSRF=$(curl -s -c cookie.txt "http://target/login.php" | awk -F \'value=\' \'/user_token/ {print $2}\' | cut -d "\'" -f2)', desc:'Extract CSRF token and session cookie for protected web forms', target:'hydra.html#http' }
+]);
+</script>
+</body>
+</html>

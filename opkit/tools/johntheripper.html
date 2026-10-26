@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>John the Ripper Cheatsheet — Password Cracking &amp; Extraction | OPKIT</title>
+  <meta name="description" content="Complete John the Ripper reference: dictionary attacks with mangling rules, single crack mode, 2john extraction utilities, hash identification, and Hashcat workflows.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #e8a03a; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="John the Ripper navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/john/images/john-logo.svg" alt="John the Ripper" onerror="this.onerror=null;this.src='../images/tools/john.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">John the Ripper</div>
+          <div class="tool-sidebar__version">Jumbo · Password auditor</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Workflow</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Pitfalls &amp; Warnings
+        </div>
+        <div class="sidebar-nav-item" data-section="quick-start">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          First 3 Commands
+        </div>
+        <div class="sidebar-nav-item" data-section="setup">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Setup &amp; Identification
+        </div>
+        <div class="sidebar-nav-item" data-section="attack-modes">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+          Attack Modes
+        </div>
+        <div class="sidebar-nav-item" data-section="formats">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Hash Formats &amp; Detect
+        </div>
+        <div class="sidebar-nav-item" data-section="2john">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          2john Extraction
+        </div>
+        <div class="sidebar-nav-item" data-section="rules">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Rules &amp; Mangling
+        </div>
+        <div class="sidebar-nav-item" data-section="gpu-hashcat">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          GPU &amp; Hashcat
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"/></svg>Offline Password Security Auditing &amp; Hash Recovery</div>
+      <h1 class="tool-hero__title">John the Ripper</h1>
+      <p class="tool-hero__desc">A versatile offline password security auditor supporting 400+ cipher and hash formats. Master rule-based dictionary mangling, single-crack username mutations, multi-core CPU fork parallelization, and the essential 2john extraction pipeline for SSH keys, archives, and system shadow files.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">Rule Mangling (--rules)</span>
+        <span class="tool-hero__tag">Single Crack Mode</span>
+        <span class="tool-hero__tag">2john Extractors</span>
+        <span class="tool-hero__tag">Format Explicit (--format)</span>
+        <span class="tool-hero__tag">Multi-Core (--fork)</span>
+        <span class="tool-hero__tag">Linux /etc/shadow</span>
+        <span class="tool-hero__tag">Windows NTLM</span>
+        <span class="tool-hero__tag">GPU vs Hashcat</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" id="quick-start" style="margin-bottom: var(--sp-6); border-color: rgba(232, 160, 58, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(232, 160, 58, 0.08); border-bottom-color: rgba(232, 160, 58, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-accent));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Rules, extraction, and explicit formats — the three things most tutorials skip.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span> <span class="tok-arg">hashes.txt</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Dictionary attack with mangling rules</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">ssh2john</span> <span class="tok-arg">id_rsa</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-arg">hash.txt</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Extract &amp; crack SSH key passphrase</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--format</span><span class="tok-val">=NT</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">ntlm.txt</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Crack Windows NTLM hashes (explicit format)</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Pitfalls & Warnings -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <h2 class="content-section__title" id="pitfalls-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Critical Pitfalls &amp; Warnings
+      </h2>
+
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Why is John finding zero passwords? — The format, rules, and show traps.</strong>
+          <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+            <li><strong>--rules is not optional:</strong> Without rules, John tries only the literal words in your wordlist and misses the vast majority of human passwords (capitalization, appended digits, leetspeak). Always add <code>--rules</code> on the first dictionary pass. The <code>best64</code> ruleset alone is a fast, low-cost multiplier.</li>
+            <li><strong>Auto-detection fails silently:</strong> John can misidentify a 32-hex-character hash (MD5, NTLM, and LM all look similar). It will run "successfully" and crack nothing because it is solving the wrong cryptographic algorithm. Always specify <code>--format=</code> when you know the hash type. If John finishes in seconds with 0 cracked, the format is likely wrong.</li>
+            <li><strong>--show requires the same format flag:</strong> If you cracked hashes with <code>--format=NT</code> and then run <code>john --show hashes.txt</code> without that flag, John will report nothing because it looks in the potfile for default-detected formats. Always use the exact same <code>--format=</code> with <code>--show</code> that you used during the crack.</li>
+            <li><strong>John is CPU-first:</strong> It is excellent for quick checks, single-crack username mangling, and messy real-world files, but GPU-based tools like Hashcat are 50–100&times; faster on raw hashes. If you have a dedicated GPU, use Hashcat for large-scale cracking and John for extraction and quick inspection.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Setup & Hash Identification -->
+    <section class="content-section" id="setup" aria-labelledby="setup-title">
+      <h2 class="content-section__title" id="setup-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Setup &amp; Hash Identification
+      </h2>
+      <p style="font-size:var(--t-sm); color:var(--c-muted); margin-bottom:var(--sp-4);">Before cracking, you must accurately determine the algorithm and verify that your John environment supports the targeted cipher.</p>
+
+      <div class="cmd-list" role="list">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Identify an unknown hash</div>
+              <div class="cmd-block__desc">Inspect hash length, character set, and salt delimiters to find algorithm candidates</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hashid</span> <span class="tok-flag">-m</span> <span class="tok-flag">-j</span> <span class="tok-arg">'098f6bcd4621d373cade4e832627b4f6'</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hash-identifier</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Identification Tip:</span> <code>hashid -m -j</code> outputs both the Hashcat mode (<code>-m</code>) and the John the Ripper format flag (<code>-j</code>), allowing you to immediately select the correct format string.
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">List and filter supported formats</div>
+              <div class="cmd-block__desc">Search John's internal database for the exact --format= identifier string</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--list</span><span class="tok-val">=formats</span> <span class="tok-pipe">|</span> <span class="tok-cmd">grep</span> <span class="tok-flag">-i</span> <span class="tok-arg">ntlm</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--list</span><span class="tok-val">=formats</span> <span class="tok-pipe">|</span> <span class="tok-cmd">grep</span> <span class="tok-flag">-i</span> <span class="tok-arg">sha512</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--list</span><span class="tok-val">=subformats</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Verify John the Ripper version &amp; Jumbo build</div>
+              <div class="cmd-block__desc">Confirm whether you are running Jumbo (with 2john tools) or restricted core John</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--version</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Jumbo Build Note:</span> Kali Linux and Parrot OS ship with the community-enhanced <strong>John Jumbo</strong> package by default. If running upstream core John, 2john extractors and modern OpenCL formats will not be present.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Attack Modes -->
+    <section class="content-section" id="attack-modes" aria-labelledby="attack-modes-title">
+      <h2 class="content-section__title" id="attack-modes-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+        Attack Modes
+      </h2>
+
+      <div class="cmd-list" role="list">
+        <!-- Single Crack Mode -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Single crack mode (username &amp; GECOS mangling)</div>
+              <div class="cmd-block__desc">Uses login names, full names, and home directory tokens to synthesize guesses</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--single</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--single</span> <span class="tok-flag">--format</span><span class="tok-val">=sha512crypt</span> <span class="tok-arg">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Why Single Mode First:</span> Single mode is John's unique superpower. It parses username and GECOS information in <code>user:hash</code> lines and applies mutations (e.g. <code>jdoe</code> &rarr; <code>Jdoe1!</code>, <code>jdoe2024</code>). It executes in seconds and catches weak passwords that general wordlists miss completely.
+            </div>
+          </div>
+        </div>
+
+        <!-- Wordlist with Rules -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Wordlist mode with mangling rules (the primary attack)</div>
+              <div class="cmd-block__desc">Combine dictionary words with capitalization, appending digits, and leetspeak rules</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=/usr/share/wordlists/rockyou.txt</span> <span class="tok-flag">--rules</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=best64</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=Jumbo</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Rule Sets:</span> Bare <code>--rules</code> triggers the default <code>[List.Rules:Wordlist]</code> ruleset in <code>john.conf</code>. Use <code>--rules=best64</code> for a lightning-fast multiplier, or <code>--rules=Jumbo</code> for deep, extensive password mutations.
+            </div>
+          </div>
+        </div>
+
+        <!-- Incremental (Brute-Force) Mode -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Incremental (smart brute-force) mode</div>
+              <div class="cmd-block__desc">Frequency-guided character generation across length and character subsets</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--incremental</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--incremental</span><span class="tok-val">=Digits</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--incremental</span><span class="tok-val">=Alnum</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Char-Frequency Guidance:</span> John does not brute-force randomly (AAA, AAB...). It uses trigram probability tables trained on real passwords. Restricting to <code>Digits</code> or <code>Alnum</code> limits the keyspace when targeting numeric PINs or restricted passwords.
+            </div>
+          </div>
+        </div>
+
+        <!-- Show & Restore -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Inspect results &amp; manage cracking sessions</div>
+              <div class="cmd-block__desc">Display recovered plaintexts, check live status, or resume interrupted jobs</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--show</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--show</span> <span class="tok-flag">--format</span><span class="tok-val">=NT</span> <span class="tok-arg">ntlm.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--status</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--restore</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--session</span><span class="tok-val">=audit24</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--restore</span><span class="tok-val">=audit24</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hash Formats & Auto-Detection -->
+    <section class="content-section" id="formats" aria-labelledby="formats-title">
+      <h2 class="content-section__title" id="formats-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Hash Formats &amp; Auto-Detection
+      </h2>
+
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-1);">Auto-detection can confuse raw hashes.</strong>
+          A 32-character hex string could be MD5, NTLM, or LM. If John finds zero passwords quickly, the format is likely wrong. Use <code>hashid</code> to identify the hash first, then force the correct format with <code>--format=</code>.
+        </div>
+      </div>
+
+      <table class="flags-table" role="table">
+        <thead><tr><th scope="col">Format flag</th><th scope="col">Hash algorithm</th><th scope="col">Example context / Origin</th></tr></thead>
+        <tbody>
+          <tr><td><code class="flag-code">--format=raw-md5</code></td><td class="flag-desc">MD5 (raw hex, 32 chars)</td><td class="flag-default">Web apps, legacy databases, file checksums</td></tr>
+          <tr><td><code class="flag-code">--format=raw-sha1</code></td><td class="flag-desc">SHA-1 (raw hex, 40 chars)</td><td class="flag-default">Legacy web systems, Git object commits</td></tr>
+          <tr><td><code class="flag-code">--format=raw-sha256</code></td><td class="flag-desc">SHA-256 (raw hex, 64 chars)</td><td class="flag-default">Modern API tokens, database passwords</td></tr>
+          <tr><td><code class="flag-code">--format=NT</code></td><td class="flag-desc">Windows NTLM (32 hex)</td><td class="flag-default">Windows SAM database, Active Directory NTDS.dit</td></tr>
+          <tr><td><code class="flag-code">--format=LM</code></td><td class="flag-desc">LanManager</td><td class="flag-default">Legacy Windows LAN auth (split 7+7 chars)</td></tr>
+          <tr><td><code class="flag-code">--format=md5crypt</code></td><td class="flag-desc">MD5crypt (<code>$1$</code>)</td><td class="flag-default">Legacy Linux <code>/etc/shadow</code>, Apache <code>htpasswd</code></td></tr>
+          <tr><td><code class="flag-code">--format=sha512crypt</code></td><td class="flag-desc">SHA-512crypt (<code>$6$</code>)</td><td class="flag-default">Standard Linux shadow (Ubuntu, Debian, RHEL)</td></tr>
+          <tr><td><code class="flag-code">--format=bcrypt</code></td><td class="flag-desc">bcrypt (<code>$2a$</code>, <code>$2b$</code>, <code>$2y$</code>)</td><td class="flag-default">Modern web frameworks (PHP, Rails, Node.js)</td></tr>
+          <tr><td><code class="flag-code">--format=krb5tgs</code></td><td class="flag-desc">Kerberos 5 TGS-REP etype 23</td><td class="flag-default">Active Directory Kerberoasting attacks</td></tr>
+          <tr><td><code class="flag-code">--format=net-ntlmv2</code></td><td class="flag-desc">NetNTLMv2</td><td class="flag-default">Responder / Inveigh SMB relay captures</td></tr>
+          <tr><td><code class="flag-code">--format=descrypt</code></td><td class="flag-desc">DES crypt</td><td class="flag-default">Historic Unix shadow &amp; htpasswd hashes</td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:var(--sp-4)">
+        <div class="code-line" style="background:var(--c-surface);border-radius:var(--r-md);border:1px solid var(--c-border)">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--format</span><span class="tok-val">=raw-md5</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span> <span class="tok-arg">md5_hashes.txt</span></code>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2john Extraction Utilities -->
+    <section class="content-section" id="2john" aria-labelledby="2john-title">
+      <h2 class="content-section__title" id="2john-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        2john Extraction Utilities &amp; Workflows
+      </h2>
+
+      <!-- Info Callout: 2john Workflow -->
+      <div class="callout callout--info" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-accent); display:block; margin-bottom:var(--sp-1);">The 2john family: extracting hashes from protected files.</strong>
+          John cannot directly read encrypted ZIPs, SSH keys, or Office documents. The 2john helper scripts convert these files into a crackable hash format. The workflow is always: <strong>extract &rarr; crack &rarr; show</strong>. For example: <code>zip2john secret.zip &gt; hash.txt</code>, then <code>john hash.txt</code>, then <code>john --show hash.txt</code>. This three-step pattern applies to every 2john utility.
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- SSH Private Key Passphrase -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">SSH private key passphrase workflow</div>
+              <div class="cmd-block__desc">Extract the cipher blob from encrypted RSA/DSA/Ed25519 keys and crack the passphrase</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">ssh2john</span> <span class="tok-arg">id_rsa</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">ssh_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=/usr/share/wordlists/rockyou.txt</span> <span class="tok-arg">ssh_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--show</span> <span class="tok-arg">ssh_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Encrypted Archives & Documents -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Password-protected ZIP, Office, KeePass, &amp; PDF files</div>
+              <div class="cmd-block__desc">Extract hashes from documents and archives using dedicated python/C extractors</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">zip2john</span> <span class="tok-arg">secret.zip</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">zip_hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">zip_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">office2john</span> <span class="tok-arg">sheet.xlsx</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">office_hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">office_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">keepass2john</span> <span class="tok-arg">database.kdbx</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">kp_hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">kp_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">pdf2john</span> <span class="tok-arg">confidential.pdf</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">pdf_hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">pdf_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">rar2john</span> <span class="tok-arg">archive.rar</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">rar_hash.txt</span> <span class="tok-op">&amp;&amp;</span> <span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">rar_hash.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linux /etc/shadow -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Linux /etc/shadow &amp; /etc/passwd unshadow workflow</div>
+              <div class="cmd-block__desc">Combine system user account entries with password hashes into John format</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">unshadow</span> <span class="tok-arg">/etc/passwd</span> <span class="tok-arg">/etc/shadow</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--format</span><span class="tok-val">=sha512crypt</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span> <span class="tok-arg">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--show</span> <span class="tok-flag">--format</span><span class="tok-val">=sha512crypt</span> <span class="tok-arg">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reference Table -->
+      <table class="flags-table" role="table" style="margin-top:var(--sp-4);">
+        <thead><tr><th scope="col">Utility</th><th scope="col">Target Source</th><th scope="col">Example Command</th></tr></thead>
+        <tbody>
+          <tr><td><code class="flag-code">ssh2john</code></td><td class="flag-desc">Encrypted SSH private key (RSA, DSA, Ed25519)</td><td class="flag-default">ssh2john id_rsa &gt; ssh.hash</td></tr>
+          <tr><td><code class="flag-code">zip2john</code></td><td class="flag-desc">Password-protected ZIP archive</td><td class="flag-default">zip2john archive.zip &gt; zip.hash</td></tr>
+          <tr><td><code class="flag-code">rar2john</code></td><td class="flag-desc">Password-protected RAR archive (RAR3/5)</td><td class="flag-default">rar2john file.rar &gt; rar.hash</td></tr>
+          <tr><td><code class="flag-code">pdf2john</code></td><td class="flag-desc">Encrypted PDF document (Acrobat 128/256-bit)</td><td class="flag-default">pdf2john doc.pdf &gt; pdf.hash</td></tr>
+          <tr><td><code class="flag-code">keepass2john</code></td><td class="flag-desc">KeePass password database (.kdb, .kdbx)</td><td class="flag-default">keepass2john db.kdbx &gt; kp.hash</td></tr>
+          <tr><td><code class="flag-code">office2john</code></td><td class="flag-desc">MS Office documents (Word, Excel, PowerPoint)</td><td class="flag-default">office2john doc.docx &gt; office.hash</td></tr>
+          <tr><td><code class="flag-code">gpg2john</code></td><td class="flag-desc">GPG / PGP encrypted private keyring</td><td class="flag-default">gpg2john priv.gpg &gt; gpg.hash</td></tr>
+          <tr><td><code class="flag-code">bitlocker2john</code></td><td class="flag-desc">Windows BitLocker volume recovery password</td><td class="flag-default">bitlocker2john -i drive.img &gt; bitlocker.hash</td></tr>
+          <tr><td><code class="flag-code">unshadow</code></td><td class="flag-desc">Combines /etc/passwd and /etc/shadow</td><td class="flag-default">unshadow passwd shadow &gt; combined.txt</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Rules & Wordlist Mangling -->
+    <section class="content-section" id="rules" aria-labelledby="rules-title">
+      <h2 class="content-section__title" id="rules-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Rules &amp; Wordlist Mangling
+      </h2>
+
+      <div class="cmd-list" role="list">
+        <!-- Core Rule Flag -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">The core --rules flag (Wordlist default)</div>
+              <div class="cmd-block__desc">Applies in-memory password mutations without pre-generating giant files on disk</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">How Rules Work:</span> Real humans rarely pick dictionary words as-is. They capitalize the first letter, append birth years, or substitute characters (<code>password</code> &rarr; <code>Password2024!</code>). John's rule engine generates these candidate mutations on the fly in CPU RAM.
+            </div>
+          </div>
+        </div>
+
+        <!-- Named Rulesets -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Named rulesets (best64, Jumbo, KoreLogic)</div>
+              <div class="cmd-block__desc">Select specialized rule collections calibrated for speed, coverage, or enterprise patterns</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=best64</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=Jumbo</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=KoreLogic</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">When to Use:</span> <code>best64</code> is the gold standard for initial fast passes (64 highest-yield transformations). <code>Jumbo</code> executes exhaustive permutations when CPU time permits. <code>KoreLogic</code> applies aggressive enterprise security assessment mutations.
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Rules -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Define custom rules in john.conf</div>
+              <div class="cmd-block__desc">Craft custom mutation logic to target specific organization password policies</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div style="font-size: var(--t-xs); color: var(--c-text); padding: var(--sp-2) var(--sp-4); background: rgba(0, 0, 0, 0.2); border-left: 3px solid var(--tool-color); font-family: monospace;">
+              # Append to /etc/john/john.conf or ~/.john/john.conf<br>
+              [List.Rules:CompanyPolicy]<br>
+              c Az"[0-9][0-9]" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Capitalize 1st letter, append 2 digits<br>
+              c Az"[0-9][0-9][!@#$]" &nbsp;&nbsp;# Capitalize, append 2 digits + special symbol
+            </div>
+            <div class="code-line" style="margin-top:var(--sp-2);">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=CompanyPolicy</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Core Fork -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Multi-core parallelization (--fork)</div>
+              <div class="cmd-block__desc">Spawn isolated worker processes across CPU cores (John Jumbo feature)</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--fork</span><span class="tok-val">=4</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-flag">--rules</span><span class="tok-val">=best64</span> <span class="tok-arg">hashes.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--fork</span><span class="tok-val">=8</span> <span class="tok-flag">--single</span> <span class="tok-arg">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Fork vs Threading:</span> John Jumbo uses POSIX <code>fork()</code> to create separate process instances that communicate through IPC and automatically share cracked plaintexts in <code>~/.john/john.pot</code>. Match <code>--fork</code> to your physical CPU core count (<code>nproc</code>).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GPU Acceleration & Hashcat -->
+    <section class="content-section" id="gpu-hashcat" aria-labelledby="gpu-hashcat-title">
+      <h2 class="content-section__title" id="gpu-hashcat-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+        GPU Acceleration &amp; Hashcat Integration
+      </h2>
+      <p style="font-size:var(--t-sm); color:var(--c-muted); margin-bottom:var(--sp-4);">John the Ripper is CPU-first; Hashcat is GPU-first. Understanding the division of labor between both tools is crucial for scaling your cracking workflow.</p>
+
+      <!-- Comparison Matrix -->
+      <table class="flags-table" role="table">
+        <thead><tr><th scope="col">Criteria</th><th scope="col">John the Ripper (Jumbo)</th><th scope="col">Hashcat</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Primary Architecture</strong></td><td class="flag-desc">CPU-first (multi-process core scaling)</td><td class="flag-default">GPU-first (massive CUDA / OpenCL parallelism)</td></tr>
+          <tr><td><strong>Raw Hash Throughput</strong></td><td class="flag-desc">Moderate (millions of hashes/sec)</td><td class="flag-default">Massive (billions to tens of billions/sec)</td></tr>
+          <tr><td><strong>Format Auto-Detection</strong></td><td class="flag-desc">Yes (heuristics across hundreds of formats)</td><td class="flag-default">No (requires explicit <code>-m &lt;mode&gt;</code>)</td></tr>
+          <tr><td><strong>File Extraction Utilities</strong></td><td class="flag-desc">Yes (comprehensive <code>2john</code> suite)</td><td class="flag-default">No (relies on John or third-party extractors)</td></tr>
+          <tr><td><strong>Complex &amp; Salted Formats</strong></td><td class="flag-desc">Excellent for messy custom formats &amp; single mode</td><td class="flag-default">Strict format schemas per module</td></tr>
+          <tr><td><strong>Best For</strong></td><td class="flag-desc">Quick checks, SSH keys, archives, CPU-only hosts</td><td class="flag-default">Large-scale audits, GPU rigs, massive wordlists</td></tr>
+        </tbody>
+      </table>
+
+      <div class="cmd-list" role="list" style="margin-top:var(--sp-4);">
+        <!-- Workflow: Extract with John, Crack with Hashcat -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">The standard pipeline: extract with John, crack with Hashcat</div>
+              <div class="cmd-block__desc">Use John's 2john utility to obtain the hash, then unleash Hashcat on GPU compute</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">zip2john</span> <span class="tok-arg">secret.zip</span> <span class="tok-pipe">&gt;</span> <span class="tok-val">zip.hash</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">hashcat</span> <span class="tok-flag">-m</span> <span class="tok-val">13600</span> <span class="tok-flag">-a</span> <span class="tok-val">0</span> <span class="tok-arg">zip.hash</span> <span class="tok-val">rockyou.txt</span> <span class="tok-flag">-r</span> <span class="tok-val">/usr/share/hashcat/rules/best64.rule</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Interoperability:</span> Hashcat natively recognizes output lines generated by <code>zip2john</code> (mode 13600), <code>office2john</code> (mode 9400–9600), and <code>keepass2john</code> (mode 13400).
+            </div>
+          </div>
+        </div>
+
+        <!-- When John GPU is Enough -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">When John's native OpenCL GPU support is enough</div>
+              <div class="cmd-block__desc">Run John's built-in OpenCL modules for fast ad-hoc checks without converting files</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--list</span><span class="tok-val">=formats</span> <span class="tok-pipe">|</span> <span class="tok-cmd">grep</span> <span class="tok-flag">-i</span> <span class="tok-arg">opencl</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt" aria-hidden="true">$</span>
+              <code class="code-line__code"><span class="tok-cmd">john</span> <span class="tok-flag">--format</span><span class="tok-val">=sha512crypt-opencl</span> <span class="tok-flag">--wordlist</span><span class="tok-val">=rockyou.txt</span> <span class="tok-arg">combined.txt</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Dictionary + Rules</div><div class="cheat-cell__code">john --wordlist=rockyou.txt --rules hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Single Crack Mode</div><div class="cheat-cell__code">john --single hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Fast Ruleset Pass</div><div class="cheat-cell__code">john --wordlist=rockyou.txt --rules=best64 hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Show Cracked Plaintexts</div><div class="cheat-cell__code">john --show --format=NT ntlm.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Specify Format Explicit</div><div class="cheat-cell__code">john --format=raw-sha256 --wordlist=rockyou.txt hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Linux Shadow Preparation</div><div class="cheat-cell__code">unshadow /etc/passwd /etc/shadow &gt; combined.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Extract SSH Key Hash</div><div class="cheat-cell__code">ssh2john id_rsa &gt; hash.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Extract ZIP Hash</div><div class="cheat-cell__code">zip2john file.zip &gt; hash.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Multi-Core Fork</div><div class="cheat-cell__code">john --fork=4 --wordlist=rockyou.txt hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Incremental PIN Brute</div><div class="cheat-cell__code">john --incremental=Digits pin_hashes.txt</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Session Status Check</div><div class="cheat-cell__code">john --status</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Resume Session</div><div class="cheat-cell__code">john --restore</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Identify Unknown Hash</div><div class="cheat-cell__code">hashid -m -j '&lt;hash&gt;'</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">List Formats by Filter</div><div class="cheat-cell__code">john --list=formats | grep -i &lt;name&gt;</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Netcat to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">unshadow passwd shadow &gt; comb.txt &amp;&amp; john --format=sha512crypt --wordlist=rockyou.txt comb.txt</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Metasploit to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">john --format=NT --wordlist=rockyou.txt msf_hashes.txt</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; John to Hashcat</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">zip2john secret.zip &gt; z.hash &amp;&amp; hashcat -m 13600 z.hash rockyou.txt</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'John', cmd:'john --wordlist=rockyou.txt --rules hashes.txt', desc:'Dictionary attack with mangling rules', target:'johntheripper.html#rules' },
+  { tool:'John', cmd:'ssh2john id_rsa > hash.txt && john hash.txt', desc:'Extract and crack SSH key passphrase', target:'johntheripper.html#2john' },
+  { tool:'John', cmd:'john --format=NT --wordlist=rockyou.txt ntlm.txt', desc:'Crack Windows NTLM hashes with explicit format', target:'johntheripper.html#formats' },
+  { tool:'John', cmd:'john --single hashes.txt', desc:'Single crack mode using username and GECOS information', target:'johntheripper.html#attack-modes' },
+  { tool:'John', cmd:'john --format=raw-md5 --wordlist=rockyou.txt hashes.txt', desc:'Crack raw MD5 hex hashes with explicit format flag', target:'johntheripper.html#formats' },
+  { tool:'John', cmd:'unshadow /etc/passwd /etc/shadow > combined.txt', desc:'Combine Linux passwd and shadow files for cracking', target:'johntheripper.html#2john' },
+  { tool:'John', cmd:'john --list=formats | grep <keyword>', desc:'Search and filter supported hash format strings', target:'johntheripper.html#setup' },
+  { tool:'John', cmd:'hashid -m -j \'<hash>\'', desc:'Identify unknown hash type and display John/Hashcat flags', target:'johntheripper.html#setup' },
+  { tool:'John', cmd:'john --show --format=NT hashes.txt', desc:'Display previously cracked plaintext passwords with format flag', target:'johntheripper.html#attack-modes' },
+  { tool:'John', cmd:'john --restore', desc:'Resume interrupted cracking session from record file', target:'johntheripper.html#attack-modes' },
+  { tool:'John', cmd:'john --fork=4 --wordlist=rockyou.txt --rules hashes.txt', desc:'Parallelize wordlist cracking across 4 CPU cores', target:'johntheripper.html#rules' },
+  { tool:'John', cmd:'zip2john secret.zip > zip_hash.txt', desc:'Extract crackable hash from password-protected ZIP archive', target:'johntheripper.html#2john' }
+]);
+</script>
+</body>
+</html>

