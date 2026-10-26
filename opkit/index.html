@@ -3,9 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      OPKIT — Cybersecurity Reference &amp; Terminal Tool Cheatsheets
-    </title>
+    <title>OPKIT Toolkit</title>
     <meta
       name="description"
       content="Precision command cheatsheets for Nmap, Hydra, Metasploit, ffuf, Gobuster, Burp Suite, SQLmap, Wireshark, Netcat, and John the Ripper. Built for terminal speed and authorized security testing."
@@ -265,10 +263,11 @@
           <!-- 1. Reconnaissance: Nmap -->
           <a
             href="tools/nmap.html"
-            class="tool-card"
+            class="tool-card tool-card--nmap"
             data-category="recon"
             aria-label="Nmap — Network scanner and host discovery"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/nmap/images/nmap-logo.svg"
@@ -311,10 +310,11 @@
           <!-- 2. Reconnaissance: Wireshark / TShark -->
           <a
             href="tools/wireshark.html"
-            class="tool-card"
+            class="tool-card tool-card--wireshark"
             data-category="recon"
             aria-label="Wireshark and TShark — Packet analysis"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/wireshark/images/wireshark-logo.svg"
@@ -358,10 +358,11 @@
           <!-- 3. Web: ffuf -->
           <a
             href="tools/ffuf.html"
-            class="tool-card"
+            class="tool-card tool-card--ffuf"
             data-category="web"
             aria-label="ffuf — Fast web fuzzer"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/ffuf/images/ffuf-logo.svg"
@@ -404,10 +405,11 @@
           <!-- 4. Web: Gobuster -->
           <a
             href="tools/gobuster.html"
-            class="tool-card"
+            class="tool-card tool-card--gobuster"
             data-category="web"
             aria-label="Gobuster — Directory and DNS brute-forcer"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/gobuster/images/gobuster-logo.svg"
@@ -450,10 +452,11 @@
           <!-- 5. Web: Burp Suite -->
           <a
             href="tools/burpsuite.html"
-            class="tool-card"
+            class="tool-card tool-card--burpsuite"
             data-category="web"
             aria-label="Burp Suite — Web application security testing"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/burpsuite/images/burpsuite-logo.svg"
@@ -496,10 +499,11 @@
           <!-- 6. Web: SQLmap -->
           <a
             href="tools/sqlmap.html"
-            class="tool-card"
+            class="tool-card tool-card--sqlmap"
             data-category="web"
             aria-label="SQLmap — Automatic SQL injection takeover"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/sqlmap/images/sqlmap-logo.svg"
@@ -542,10 +546,11 @@
           <!-- 7. Exploitation: Metasploit -->
           <a
             href="tools/metasploit.html"
-            class="tool-card"
+            class="tool-card tool-card--metasploit"
             data-category="exploit"
             aria-label="Metasploit — Exploitation framework"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
@@ -588,10 +593,11 @@
           <!-- 8. Exploitation: Netcat / Ncat -->
           <a
             href="tools/netcat.html"
-            class="tool-card"
+            class="tool-card tool-card--netcat"
             data-category="exploit"
             aria-label="Netcat and Ncat — Networking utility"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/netcat/images/netcat-logo.svg"
@@ -634,10 +640,11 @@
           <!-- 9. Cracking: Hydra -->
           <a
             href="tools/hydra.html"
-            class="tool-card"
+            class="tool-card tool-card--hydra"
             data-category="cracking"
             aria-label="Hydra — Online credential brute-forcing"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/hydra/images/hydra-logo.svg"
@@ -680,10 +687,11 @@
           <!-- 10. Cracking: John the Ripper -->
           <a
             href="tools/johntheripper.html"
-            class="tool-card"
+            class="tool-card tool-card--john"
             data-category="cracking"
             aria-label="John the Ripper — Password hash cracker"
           >
+            <div class="tool-card__bg-cover" aria-hidden="true"></div>
             <div class="tool-card__bg-logo" aria-hidden="true">
               <img
                 src="https://www.kali.org/tools/john/images/john-logo.svg"
@@ -732,14 +740,22 @@
         <div class="about-grid">
           <div>
             <h2 class="about-title" id="about-heading">
-              Built for the terminal.<br /><span class="about-title__sub">Engineered for speed.</span>
+              Built for the terminal.<br /><span class="about-title__sub"
+                >Engineered for speed.</span
+              >
             </h2>
             <div class="prose">
               <p>
-                An operator is only as good as their understanding of the tools they wield. OPKIT puts the commands, flags, and techniques you need within reach — so you spend less time searching and more time mastering your craft.
+                An operator is only as good as their understanding of the tools
+                they wield. OPKIT puts the commands, flags, and techniques you
+                need within reach — so you spend less time searching and more
+                time mastering your craft.
               </p>
               <p>
-                Every second counts. Every command matters. Study the syntax, understand the system, and know exactly why you're executing each line. Speed comes from preparation. Precision comes from discipline.
+                Every second counts. Every command matters. Study the syntax,
+                understand the system, and know exactly why you're executing
+                each line. Speed comes from preparation. Precision comes from
+                discipline.
               </p>
               <p class="prose__close">
                 Don't just run commands. Understand what happens when you do.
@@ -764,10 +780,22 @@
               </svg>
               <div class="callout__body">
                 <div class="callout__title">A Word to the Operator</div>
-                <p>Listen carefully. Tools are easy to learn. Discipline is what separates an amateur from a professional.</p>
-                <p>Learn the systems. Question everything. Master your craft. But never confuse the ability to break through a wall with the wisdom to know which walls should remain standing.</p>
-                <p>Test with permission. Operate with purpose. Leave no doubt about your skill, and no question about your integrity.</p>
-                <p class="callout__close">Be sharp. Be deliberate. Earn your reputation.</p>
+                <p>
+                  Listen carefully. Tools are easy to learn. Discipline is what
+                  separates an amateur from a professional.
+                </p>
+                <p>
+                  Learn the systems. Question everything. Master your craft. But
+                  never confuse the ability to break through a wall with the
+                  wisdom to know which walls should remain standing.
+                </p>
+                <p>
+                  Test with permission. Operate with purpose. Leave no doubt
+                  about your skill, and no question about your integrity.
+                </p>
+                <p class="callout__close">
+                  Be sharp. Be deliberate. Earn your reputation.
+                </p>
               </div>
             </div>
 
